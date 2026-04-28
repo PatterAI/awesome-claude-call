@@ -344,7 +344,7 @@ One file per (flag × session). Cleaned up by `disarm.sh` on `SessionEnd`. State
 
 | Failure | Behavior |
 |---|---|
-| `patter-mcp` not running when slash command fires | MCP tool call fails. Subagent reports: "Patter MCP isn't reachable at $PATTER_MCP_URL. Start it with `cd patter-mcp && npm run dev`." |
+| `patter-mcp` not running when slash command fires | Hook scripts and slash commands first ping `${PATTER_MCP_URL%/mcp}/health` (1.5s timeout). On failure: subagent reports "Patter MCP isn't reachable at $PATTER_MCP_URL. Start it with `cd patter-mcp && npm run dev` (Node 22+ required)." Hooks log to `$CLAUDE_CALL_LOG` and exit 0 (never block Claude). |
 | Invalid E.164 number | Subagent refuses to call; asks user to clarify the format. |
 | Hook script fails (network, missing patter-mcp) | Logs to `$CLAUDE_CALL_LOG`. Hook exits 0 — never blocks Claude's normal flow. |
 | Call connects but voicemail picked up | `make_call` accepts `voicemailMessage`; the agent's system prompt always includes a fallback message. |
@@ -397,10 +397,14 @@ CI: GitHub Actions running `bats tests/` on every push. No real phone calls in C
 End-state install for a new user:
 
 ```bash
+# Prerequisites: Node 22+ (patter-mcp requirement), an active Twilio number,
+# and API keys for OpenAI + Deepgram + ElevenLabs.
+
 # 1. Clone patter-mcp + start it (one-time)
 git clone https://github.com/PatterAI/patter-mcp ~/dev/patter-mcp
 cd ~/dev/patter-mcp && cp .env.example .env && $EDITOR .env
 npm install && npm run dev   # leave running, or launchd it
+# Verify: curl http://localhost:3000/health → 200 OK
 
 # 2. Install the plugin
 claude plugin install https://github.com/FrancescoRosciano/claude-call
