@@ -1,0 +1,10 @@
+# claude-call .gitignore
+.DS_Store
+*.log
+node_modules/
+dist/
+.coverage/
+.idea/
+.vscode/
+*.bats.tmp
+tests/.tmp/

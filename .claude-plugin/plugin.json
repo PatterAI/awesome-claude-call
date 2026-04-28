@@ -1,0 +1,16 @@
+{
+  "name": "claude-call",
+  "version": "0.1.0",
+  "description": "Two-way voice bridge for Claude Code via Patter — make outbound calls, get called when work is done.",
+  "author": {
+    "name": "PatterAI",
+    "url": "https://github.com/PatterAI"
+  },
+  "repository": "https://github.com/PatterAI/awesome-claude-call",
+  "license": "MIT",
+  "keywords": ["voice", "phone", "patter", "mcp", "telephony"],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}
