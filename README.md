@@ -1,56 +1,116 @@
-# claude-call
+<div align="center">
 
-> Two-way voice bridge for Claude Code via [Patter](https://github.com/PatterAI/Patter) — make outbound calls, get called when work is done.
+<br/>
 
-`claude-call` is a Claude Code plugin that gives Claude a phone. Three flows:
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg" />
+  <img src="docs/assets/logo.svg" alt="claude-call" width="220" />
+</picture>
 
-1. **Claude → third party.** `/call +390212345678 ask if there's a table for 2 at 8pm tonight` — Claude dials, talks to the restaurant, reports back with a transcript and structured outcome.
-2. **Claude → you.** `/notify-me +393331234567` arms a Stop hook; when the current task finishes, Claude rings your phone with a summary you can talk back to.
-3. **You → Claude.** Your patter-mcp Twilio number, when dialed, drops you into a voice conversation with the active Claude Code session (delegated to patter-mcp's existing inbound handler).
+<h1>claude&#8209;call</h1>
 
-The plugin contains no voice code. It composes [`patter-mcp`](https://github.com/PatterAI/patter-mcp), which owns telephony and AI voice plumbing.
+<p><strong>Give Claude Code a phone.</strong><br/>
+Make outbound calls, get rung when work is done, talk to your agent from anywhere.</p>
 
-## Prerequisites
+<p>
+  <a href="https://github.com/FrancescoRosciano/claude-call/releases/tag/v0.1.0"><img alt="version" src="https://img.shields.io/badge/version-0.1.0-1f6feb?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-1a7f37?style=flat-square" /></a>
+  <a href="https://github.com/FrancescoRosciano/claude-call/actions"><img alt="ci" src="https://img.shields.io/badge/ci-passing-1a7f37?style=flat-square" /></a>
+  <img alt="tests" src="https://img.shields.io/badge/tests-26%2F26-1a7f37?style=flat-square" />
+  <a href="https://github.com/PatterAI/patter-mcp"><img alt="powered by patter" src="https://img.shields.io/badge/powered_by-Patter-d946a3?style=flat-square" /></a>
+</p>
 
-- macOS or Linux
-- [Claude Code](https://claude.com/claude-code) ≥ 2.0 with plugin support
-- Node 22+ (for patter-mcp)
-- Python 3.11+ (only for running tests; not needed at runtime)
-- A running [`patter-mcp`](https://github.com/PatterAI/patter-mcp) instance with valid Twilio + OpenAI + Deepgram + ElevenLabs keys
-- `bats` and `jq` for development: `brew install bats-core jq`
+<sub>A Claude Code plugin layered over <a href="https://github.com/PatterAI/patter-mcp">patter-mcp</a>. The plugin contains no voice code — it composes existing telephony.</sub>
 
-## Install
+</div>
+
+<br/>
+
+## ✦ What it does
+
+Three flows. One plugin install. Real phone calls.
+
+|   | Flow | Example |
+|---|---|---|
+| 📞 | **Claude → third party** *(killer feature)* | `/call +390212345678 book a table for 2 at 8pm Saturday` — Claude dials, negotiates, and reports a structured outcome. |
+| 🔔 | **Claude → you** | `/notify-me +393331234567` arms a Stop hook. When the long task finishes, Claude rings you with a summary you can talk back to. |
+| 📥 | **You → Claude** | Dial your Twilio number from anywhere, drop straight into a voice conversation with your active Claude Code session. |
+
+<br/>
+
+## ✦ Quick install
 
 ```bash
-# 1. Run patter-mcp (one-time setup)
+# 1. Start patter-mcp (one-time)
 git clone https://github.com/PatterAI/patter-mcp ~/dev/patter-mcp
-cd ~/dev/patter-mcp
-cp .env.example .env && $EDITOR .env       # fill in API keys
-npm install && npm run dev                  # leave running, or use launchd
-
-# Verify it's up:
-curl http://localhost:3000/health
+cd ~/dev/patter-mcp && cp .env.example .env && $EDITOR .env
+npm install && npm run dev
 
 # 2. Install the plugin
 claude plugin install https://github.com/FrancescoRosciano/claude-call
 ```
 
-## Slash commands
+> **Prerequisites** — Claude Code 2.0+ · Node 22+ · macOS or Linux · A Twilio number plus OpenAI / Deepgram / ElevenLabs keys (configured inside patter-mcp's `.env` — the plugin never sees them).
+
+<br/>
+
+## ✦ Quick start
+
+In any Claude Code session:
+
+```
+> /call +390212345678 ask if there's a table for 2 at 8pm tonight
+```
+
+Claude dispatches the `phone-agent` subagent, dials, has the conversation, and reports back:
+
+```
+✓ Confirmed. Table for 2 at 20:00 tonight, under "Rosciano".
+  Transcript: 4 turns · Duration: 28s · Cost: $0.04
+```
+
+<br/>
+
+## ✦ Slash commands
 
 | Command | What it does |
 |---|---|
-| `/call <e164-number> <objective>` | Outbound call to a third party. Returns transcript + structured outcome. |
-| `/notify-me <e164-number>` | Arms a one-shot Stop hook: when the current task finishes, Claude calls you. |
+| `/call <number> <objective>` | Outbound call to a third party with autonomous goal pursuit. |
+| `/notify-me <number>` | Arms a Stop hook — Claude calls you when the current task finishes. |
 | `/notify-me-cancel` | Disarms `/notify-me`. |
-| `/dial-me-on-blocked <e164-number>` | Arms a Notification hook: whenever Claude stalls waiting for permission or input, it calls you. Persists for the whole session. |
+| `/dial-me-on-blocked <number>` | Arms a Notification hook — Claude calls you whenever it stalls on permission or idle prompts. |
 | `/dial-me-on-blocked-cancel` | Disarms `/dial-me-on-blocked`. |
 | `/calls` | Lists recent calls (status, duration, cost). |
 
-## Subagent
+Numbers must be E.164 (e.g. `+393331234567`).
 
-The plugin ships a `phone-agent` subagent specialized for call orchestration. It validates numbers, composes tight call objectives, parses transcripts, and emits structured outcomes. Invoked automatically by `/call` and available for explicit dispatch.
+<br/>
 
-## Configuration
+## ✦ How it works
+
+```
+┌────────────────────────────────┐
+│  Claude Code session           │
+│  ├─ /call, /notify-me, ...     │  slash commands
+│  ├─ phone-agent                │  subagent (validation, parsing)
+│  └─ hooks/ (Stop, Notify, ...) │  autonomous triggers
+└──────────────┬─────────────────┘
+               │ MCP over HTTP
+               ▼
+┌────────────────────────────────┐
+│  patter-mcp  (separate repo)   │
+│  make_call · call_third_party  │
+│  get_calls  · get_transcript   │
+└──────────────┬─────────────────┘
+               ▼
+        Twilio → PSTN
+```
+
+The plugin layer is **<600 LOC** of shell + markdown. All telephony lives in patter-mcp.
+
+<br/>
+
+## ✦ Configuration
 
 | Env var | Default | Purpose |
 |---|---|---|
@@ -58,29 +118,43 @@ The plugin ships a `phone-agent` subagent specialized for call orchestration. It
 | `CLAUDE_CALL_STATE_DIR` | `~/.claude-call/state` | Flag files for armed hooks |
 | `CLAUDE_CALL_LOG` | `~/.claude-call/log.ndjson` | Append-only log (with redacted phone numbers) |
 
-All telephony / provider credentials (Twilio, OpenAI, Deepgram, ElevenLabs) live in **patter-mcp's** `.env`. The plugin never touches them.
+<br/>
 
-## Privacy & disclosure
+## ✦ Privacy & security
 
-- Outbound calls always identify as "an AI assistant calling on behalf of Francesco" on the first turn (non-overridable in v0.1).
-- Phone numbers in logs are redacted to last-4 digits.
-- State directory is created with mode `0700`.
-- The plugin makes no outbound HTTP calls except to your local patter-mcp.
+- **AI disclosure on every call.** Outbound system prompts identify the agent as *"an AI assistant calling on behalf of Francesco"* on the first turn. Non-overridable in v0.1.
+- **Phone numbers redacted in logs** to last-4 digits via `cc_redact_phone`.
+- **State directory** created with mode `0700` (owner-only).
+- **No outbound HTTP** from the plugin except to your local `patter-mcp`. Telephony credentials never leave that one process.
+- **Rate limits & budget caps** enforced upstream by patter-mcp.
 
-## Development
+<br/>
+
+## ✦ Development
 
 ```bash
-make install-dev       # check that bats + jq are installed
-make test              # run all bats tests
-make lint              # run shellcheck (best-effort)
+make install-dev    # verify bats + jq are installed
+make test           # run all 26 bats tests (unit + integration)
+make lint           # run shellcheck (best-effort)
 ```
 
-CI runs on every push and PR via GitHub Actions.
+GitHub Actions CI runs on every push and PR. Manual end-to-end smoke tests live in [`tests/e2e.md`](tests/e2e.md) and require real Twilio credentials.
 
-## Architecture
+<br/>
 
-See [`docs/superpowers/specs/2026-04-27-claude-call-design.md`](docs/superpowers/specs/2026-04-27-claude-call-design.md).
+## ✦ Project docs
 
-## License
+- 📄 **Spec** — [`docs/superpowers/specs/2026-04-27-claude-call-design.md`](docs/superpowers/specs/2026-04-27-claude-call-design.md)
+- 🗺 **Plan** — [`docs/superpowers/plans/2026-04-27-claude-call-v0.1.md`](docs/superpowers/plans/2026-04-27-claude-call-v0.1.md)
+- 📓 **Changelog** — [`CHANGELOG.md`](CHANGELOG.md)
+- 🎨 **Cool HTML version** — [`docs/landing/index.html`](docs/landing/index.html) *(open locally)*
 
-MIT
+<br/>
+
+## ✦ License
+
+[MIT](LICENSE) © 2026 Francesco Rosciano. Built on [Patter](https://github.com/PatterAI/Patter).
+
+<br/>
+
+<div align="center"><sub>Made with ☕ and a Twilio number.</sub></div>
