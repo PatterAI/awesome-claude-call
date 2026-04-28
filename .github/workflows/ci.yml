@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats-core and jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats jq
+
+      - name: Set up Python (for fake patter-mcp fixture)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run unit tests
+        run: bats tests/unit
+
+      - name: Run integration tests
+        run: bats tests/integration
+
+      - name: Verify plugin.json is valid
+        run: jq . .claude-plugin/plugin.json
+
+      - name: Verify .mcp.json is valid
+        run: jq . .mcp.json
+
+      - name: Verify hooks.json is valid
+        run: jq . hooks/hooks.json
