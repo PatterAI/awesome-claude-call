@@ -10,7 +10,7 @@ async function main(): Promise<void> {
     process.exit(code);
   }
   if (arg === '--version') {
-    process.stdout.write('0.2.0\n');
+    process.stdout.write('0.2.1\n');
     process.exit(0);
   }
   await startMcpServer();
