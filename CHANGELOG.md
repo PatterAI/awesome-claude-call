@@ -4,6 +4,13 @@ All notable changes to claude-call are documented here. Format: [Keep a Changelo
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-04-29
+
+### Fixed
+- **Plugin manifest validation rejected at install time.** v0.2.0's `plugin.json` contained `commands`/`agents`/`hooks`/`mcpServers` override fields with directory paths (e.g. `"agents": "./agents/"`). Per the current Claude Code plugin schema, those fields expect file paths or arrays — directory paths with trailing slashes fail with `Validation errors: agents: Invalid input`. The manifest is optional; Claude Code auto-discovers components in default locations. Removed the four redundant override fields.
+- **`server/dist/` was silently excluded from git** by the root `.gitignore`'s `dist/` rule (which caught nested `server/dist/` despite a contradictory comment in `server/.gitignore`). Added explicit negation `!server/dist/` so the compiled JS ships with the plugin.
+- **`server/node_modules/` is not part of the plugin** (Claude Code copies the plugin verbatim and does not run `npm install`). Wrapped `.mcp.json`'s command in a shell script that lazy-installs runtime dependencies on first launch (`npm install --omit=dev`) if `node_modules` is missing. Auto-reinstalls on plugin updates because `${CLAUDE_PLUGIN_ROOT}` contents are wiped on update.
+
 ## [0.2.0] — 2026-04-28
 
 ### Added
