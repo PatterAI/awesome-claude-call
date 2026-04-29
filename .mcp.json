@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "claude-call": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/server/dist/index.js"],
-      "cwd": "${CLAUDE_PLUGIN_ROOT}/server"
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd \"${CLAUDE_PLUGIN_ROOT}/server\" && [ -d node_modules ] || npm install --silent --omit=dev --no-audit --no-fund >&2; exec node \"${CLAUDE_PLUGIN_ROOT}/server/dist/index.js\""
+      ]
     }
   }
 }

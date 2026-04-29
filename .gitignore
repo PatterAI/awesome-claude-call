@@ -3,6 +3,9 @@
 *.log
 node_modules/
 dist/
+# server/dist/ ships with the plugin (Claude Code copies the repo verbatim into its cache):
+!server/dist/
+!server/dist/**
 .coverage/
 .idea/
 .vscode/
