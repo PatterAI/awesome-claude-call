@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.env
+coverage/
+.test-build/
+# dist/ is intentionally NOT ignored — it ships with the plugin

@@ -1,6 +1,6 @@
 {
   "name": "claude-call",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Two-way voice bridge for Claude Code via Patter — make outbound calls, get called when work is done.",
   "author": {
     "name": "PatterAI",
