@@ -1,0 +1,24 @@
+{
+  "name": "@claude-call/server",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Bundled MCP + voice server for the claude-call plugin",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "main": "dist/index.js",
+  "bin": { "claude-call-server": "dist/index.js" },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "npm run build && tsc -p tsconfig.test.json && node --test .test-build/tests/**/*.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "getpatter": "^0.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -7,32 +7,55 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  bats:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install bats-core and jq
         run: |
           sudo apt-get update
           sudo apt-get install -y bats jq
-
-      - name: Set up Python (for fake patter-mcp fixture)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run unit tests
+      - name: Run bats unit tests
         run: bats tests/unit
-
-      - name: Run integration tests
+      - name: Run bats integration tests
         run: bats tests/integration
 
-      - name: Verify plugin.json is valid
-        run: jq . .claude-plugin/plugin.json
+  server:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+      - name: Build server
+        working-directory: server
+        run: npm run build
+      - name: Typecheck
+        working-directory: server
+        run: npm run typecheck
+      - name: Run tests
+        working-directory: server
+        run: npm test
 
-      - name: Verify .mcp.json is valid
-        run: jq . .mcp.json
-
-      - name: Verify hooks.json is valid
-        run: jq . hooks/hooks.json
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Validate marketplace.json
+        run: jq . .claude-plugin/marketplace.json > /dev/null
+      - name: Validate plugin.json
+        run: jq . .claude-plugin/plugin.json > /dev/null
+      - name: Validate .mcp.json
+        run: jq . .mcp.json > /dev/null
+      - name: Validate hooks.json
+        run: jq . hooks/hooks.json > /dev/null

@@ -2,36 +2,20 @@
 
 load '../helpers/setup'
 
-PORT=19400
-FAKE_LOG=""
-
 setup() {
   CLAUDE_CALL_TMP="$(mktemp -d -t claude-call.XXXXXX)"
   export CLAUDE_CALL_STATE_DIR="${CLAUDE_CALL_TMP}/state"
   export CLAUDE_CALL_LOG="${CLAUDE_CALL_TMP}/log.ndjson"
-  export PATTER_MCP_URL="http://127.0.0.1:${PORT}/mcp"
+  export CLAUDE_CALL_FIRE_QUEUE="${CLAUDE_CALL_TMP}/fire-queue"
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/../.." && pwd)"
   export REPO_ROOT
-  FAKE_LOG="${CLAUDE_CALL_TMP}/fake-mcp-requests.log"
-
-  python3 "${REPO_ROOT}/tests/integration/fake_patter_mcp.py" "${PORT}" "${FAKE_LOG}" &
-  echo $! > "${CLAUDE_CALL_TMP}/server.pid"
-  for _ in $(seq 1 60); do
-    if curl -sS "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1; then
-      break
-    fi
-    sleep 0.05
-  done
 }
 
 teardown() {
-  if [ -f "${CLAUDE_CALL_TMP}/server.pid" ]; then
-    kill "$(cat "${CLAUDE_CALL_TMP}/server.pid")" 2>/dev/null || true
-  fi
   rm -rf "${CLAUDE_CALL_TMP}"
 }
 
-@test "on-notification permission_prompt fires make_call when armed" {
+@test "on-notification permission_prompt enqueues make_call when armed" {
   export CLAUDE_SESSION_ID="sess-N1"
   "${REPO_ROOT}/scripts/arm.sh" dial-me-on-blocked "+393331234567"
 
@@ -39,30 +23,30 @@ teardown() {
   run bash -c "echo '${payload}' | ${REPO_ROOT}/scripts/on-notification.sh permission_prompt"
   [ "$status" -eq 0 ]
 
-  sleep 0.2
-  body="$(cat "${FAKE_LOG}")"
-  echo "$body" | jq -e '.params.name == "make_call"'
-  echo "$body" | jq -e '.params.arguments.to == "+393331234567"'
-  echo "$body" | jq -e '.params.arguments.systemPrompt | test("permission")'
-  echo "$body" | jq -e '.params.arguments.systemPrompt | test("rm -rf node_modules")'
+  body=$(cat "${CLAUDE_CALL_FIRE_QUEUE}"/*.json)
+  echo "$body" | jq -e '.tool == "make_call"'
+  echo "$body" | jq -e '.args.to == "+393331234567"'
+  echo "$body" | jq -e '.args.system_prompt | test("permission")'
+  echo "$body" | jq -e '.args.system_prompt | test("rm -rf node_modules")'
+  echo "$body" | jq -e '.source == "on-notification:permission_prompt"'
 }
 
-@test "on-notification idle_prompt fires when armed" {
+@test "on-notification idle_prompt enqueues when armed" {
   export CLAUDE_SESSION_ID="sess-N2"
   "${REPO_ROOT}/scripts/arm.sh" dial-me-on-blocked "+393331234567"
 
   payload='{"session_id":"sess-N2","hook_event_name":"Notification","matcher":"idle_prompt","message":"Claude is waiting for input"}'
   run bash -c "echo '${payload}' | ${REPO_ROOT}/scripts/on-notification.sh idle_prompt"
   [ "$status" -eq 0 ]
-  sleep 0.2
-  [ -s "${FAKE_LOG}" ]
+  files=$(find "${CLAUDE_CALL_FIRE_QUEUE}" -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+  [ "$files" -eq 1 ]
 }
 
 @test "on-notification is a no-op when not armed" {
   payload='{"session_id":"sess-N3","hook_event_name":"Notification","matcher":"permission_prompt","message":"x"}'
   run bash -c "echo '${payload}' | ${REPO_ROOT}/scripts/on-notification.sh permission_prompt"
   [ "$status" -eq 0 ]
-  [ ! -s "${FAKE_LOG}" ]
+  [ ! -d "${CLAUDE_CALL_FIRE_QUEUE}" ] || [ -z "$(find "${CLAUDE_CALL_FIRE_QUEUE}" -name '*.json' 2>/dev/null)" ]
 }
 
 @test "on-notification does NOT auto-disarm (multiple prompts can fire repeatedly until SessionEnd)" {
