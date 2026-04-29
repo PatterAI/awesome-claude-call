@@ -13,10 +13,10 @@
 Make outbound calls, get rung when work is done, talk to your agent from anywhere.</p>
 
 <p>
-  <a href="https://github.com/PatterAI/awesome-claude-call/releases/tag/v0.1.0"><img alt="version" src="https://img.shields.io/badge/version-0.1.0-1f6feb?style=flat-square" /></a>
+  <a href="https://github.com/PatterAI/awesome-claude-call/releases/tag/v0.2.0"><img alt="version" src="https://img.shields.io/badge/version-0.2.0-1f6feb?style=flat-square" /></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-1a7f37?style=flat-square" /></a>
   <a href="https://github.com/PatterAI/awesome-claude-call/actions"><img alt="ci" src="https://img.shields.io/badge/ci-passing-1a7f37?style=flat-square" /></a>
-  <img alt="tests" src="https://img.shields.io/badge/tests-26%2F26-1a7f37?style=flat-square" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-43%2B26-1a7f37?style=flat-square" />
   <a href="https://github.com/PatterAI/patter-mcp"><img alt="powered by patter" src="https://img.shields.io/badge/powered_by-Patter-d946a3?style=flat-square" /></a>
 </p>
 
@@ -40,17 +40,17 @@ Three flows. One plugin install. Real phone calls.
 
 ## ✦ Quick install
 
-```bash
-# 1. Start patter-mcp (one-time)
-git clone https://github.com/PatterAI/patter-mcp ~/dev/patter-mcp
-cd ~/dev/patter-mcp && cp .env.example .env && $EDITOR .env
-npm install && npm run dev
+In any Claude Code session:
 
-# 2. Install the plugin
-claude plugin install https://github.com/PatterAI/awesome-claude-call
+```
+/plugin marketplace add https://github.com/PatterAI/awesome-claude-call
+/plugin install claude-call@claude-call
+/claude-call:setup
 ```
 
-> **Prerequisites** — Claude Code 2.0+ · Node 22+ · macOS or Linux · A Twilio number plus OpenAI / Deepgram / ElevenLabs keys (configured inside patter-mcp's `.env` — the plugin never sees them).
+The `/claude-call:setup` wizard collects your Twilio + voice-engine credentials, writes them to `~/.claude-call/credentials` (mode 0600), and runs a connectivity check before you can place calls.
+
+> **Prerequisites** — Claude Code 2.0+ · Node 20+ · macOS or Linux · Twilio number + OpenAI API key (or ElevenLabs / Deepgram if you pick a different voice engine).
 
 <br/>
 
@@ -93,61 +93,70 @@ Numbers must be E.164 (e.g. `+15555550100`).
 │  Claude Code session           │
 │  ├─ /call, /notify-me, ...     │  slash commands
 │  ├─ phone-agent                │  subagent (validation, parsing)
-│  └─ hooks/ (Stop, Notify, ...) │  autonomous triggers
+│  └─ hooks/                     │  Stop, Notification, SessionStart, SessionEnd
 └──────────────┬─────────────────┘
-               │ MCP over HTTP
+               │ stdio MCP
                ▼
 ┌────────────────────────────────┐
-│  patter-mcp  (separate repo)   │
-│  make_call · call_third_party  │
-│  get_calls  · get_transcript   │
+│  bundled server (server/)      │
+│  ├─ make_call · call_third_party
+│  ├─ get_calls · get_transcript │
+│  └─ Patter SDK + Cloudflare    │
 └──────────────┬─────────────────┘
                ▼
         Twilio → PSTN
 ```
 
-The plugin layer is **<600 LOC** of shell + markdown. All telephony lives in patter-mcp.
+The plugin layer is **<700 LOC** of shell + markdown. The bundled server (`server/`) is **~800 LOC** of TypeScript that wraps the [`getpatter`](https://www.npmjs.com/package/getpatter) SDK directly — no external `patter-mcp` repo required.
 
 <br/>
 
 ## ✦ Configuration
 
-| Env var | Default | Purpose |
+| Path / Var | Default | Purpose |
 |---|---|---|
-| `PATTER_MCP_URL` | `http://localhost:3000/mcp` | MCP server endpoint |
-| `CLAUDE_CALL_STATE_DIR` | `~/.claude-call/state` | Flag files for armed hooks |
-| `CLAUDE_CALL_LOG` | `~/.claude-call/log.ndjson` | Append-only log (with redacted phone numbers) |
+| `~/.claude-call/credentials` | — | Telephony credentials (mode 0600). Managed by `/claude-call:setup`. |
+| `~/.claude-call/calls.ndjson` | — | Append-only call history. |
+| `~/.claude-call/log.ndjson` | — | Append-only event log (phone numbers redacted). |
+| `~/.claude-call/inbound-armed` | — | Flag file. Created by `/serve-me`, removed by `/serve-me-cancel`. |
+| `CLAUDE_CALL_STATE_DIR` | `~/.claude-call/state` | Flag files for armed hooks (`/notify-me`, `/dial-me-on-blocked`). |
+| `CLAUDE_CALL_LOG` | `~/.claude-call/log.ndjson` | Override log path. |
 
 <br/>
 
 ## ✦ Privacy & security
 
-- **AI disclosure on every call.** Outbound system prompts identify the agent as *"an AI assistant calling on behalf of the user"* on the first turn. Non-overridable in v0.1.
-- **Phone numbers redacted in logs** to last-4 digits via `cc_redact_phone`.
+- **AI disclosure on every call.** Outbound system prompts identify the agent as *"an AI assistant calling on behalf of the user"* on the first turn. Non-overridable in v0.2.
+- **Phone numbers redacted in logs** to last-4 digits.
+- **Credentials file** mode `0600` enforced — server refuses to start if it's world- or group-readable.
 - **State directory** created with mode `0700` (owner-only).
-- **No outbound HTTP** from the plugin except to your local `patter-mcp`. Telephony credentials never leave that one process.
-- **Rate limits & budget caps** enforced upstream by patter-mcp.
+- **No outbound HTTP** from the plugin except to Twilio, OpenAI/ElevenLabs/Deepgram, and Cloudflare's tunnel control plane (when serving inbound).
+- **Rate limits & budget caps** enforced upstream by Patter.
 
 <br/>
 
 ## ✦ Development
 
 ```bash
-make install-dev    # verify bats + jq are installed
-make test           # run all 26 bats tests (unit + integration)
-make lint           # run shellcheck (best-effort)
+make install-dev    # verify bats + jq + node are installed
+make ci             # full CI: server build + typecheck + test + bats
+make server-test    # just the bundled server's tests
+make test           # just the bats tests
+make lint           # shellcheck (best-effort)
 ```
 
-GitHub Actions CI runs on every push and PR. Manual end-to-end smoke tests live in [`tests/e2e.md`](tests/e2e.md) and require real Twilio credentials.
+GitHub Actions CI runs on every push and PR (Ubuntu + macOS matrix). Manual end-to-end smoke tests live in [`tests/e2e.md`](tests/e2e.md) and require real Twilio credentials.
 
 <br/>
 
 ## ✦ Project docs
 
-- 📄 **Spec** — [`docs/superpowers/specs/2026-04-27-claude-call-design.md`](docs/superpowers/specs/2026-04-27-claude-call-design.md)
-- 🗺 **Plan** — [`docs/superpowers/plans/2026-04-27-claude-call-v0.1.md`](docs/superpowers/plans/2026-04-27-claude-call-v0.1.md)
+- 📄 **v0.1 Spec** — [`docs/superpowers/specs/2026-04-27-claude-call-design.md`](docs/superpowers/specs/2026-04-27-claude-call-design.md)
+- 🗺 **v0.1 Plan** — [`docs/superpowers/plans/2026-04-27-claude-call-v0.1.md`](docs/superpowers/plans/2026-04-27-claude-call-v0.1.md)
+- 📄 **v0.2 Spec** — [`docs/superpowers/specs/2026-04-28-claude-call-smooth-setup-design.md`](docs/superpowers/specs/2026-04-28-claude-call-smooth-setup-design.md)
+- 🗺 **v0.2 Plan** — [`docs/superpowers/plans/2026-04-28-claude-call-v0.2.0.md`](docs/superpowers/plans/2026-04-28-claude-call-v0.2.0.md)
 - 📓 **Changelog** — [`CHANGELOG.md`](CHANGELOG.md)
-- 🎨 **Cool HTML version** — [`docs/landing/index.html`](docs/landing/index.html) *(open locally)*
+- 🎨 **HTML landing page** — [`docs/landing/index.html`](docs/landing/index.html) *(open locally)*
 
 <br/>
 
