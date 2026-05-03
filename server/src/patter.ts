@@ -5,6 +5,7 @@ import {
   ElevenLabsConvAI,
   CloudflareTunnel,
   type Tool,
+  type ServeOptions,
 } from 'getpatter';
 import type { Credentials, VoiceEngine } from './credentials.js';
 import { logEvent } from './log.js';
@@ -24,18 +25,23 @@ export interface ServingTarget {
   systemPrompt: string;
   firstMessage?: string;
   tools?: Tool[];
-  onTranscript?: (data: unknown) => Promise<void> | void;
+  // Match the SDK's ServeOptions['onTranscript'] exactly so it round-trips
+  // through `phone.serve(...)` without a type cast.
+  onTranscript?: (data: Record<string, unknown>) => Promise<void>;
 }
 
 let cached: PatterContext | undefined;
 let servingState: { mode: ServingMode; promise: Promise<void>; key: string } | null = null;
 
 function targetKey(t: ServingTarget): string {
+  // Sort tool names so reordering the input array doesn't trigger a spurious
+  // disconnect+reconnect when the agent identity is logically the same.
+  const toolNames = [...(t.tools ?? [])].map((x) => x.name).sort().join(',');
   return JSON.stringify({
     m: t.mode,
     p: t.systemPrompt,
     f: t.firstMessage ?? '',
-    tn: (t.tools ?? []).map((x) => x.name).join(','),
+    tn: toolNames,
   });
 }
 
@@ -82,7 +88,7 @@ export async function ensureServing(ctx: PatterContext, target: ServingTarget): 
     }
     servingState = null;
   }
-  const promise = ctx.patter.serve({
+  const serveOpts: ServeOptions = {
     agent: {
       systemPrompt: target.systemPrompt,
       ...(target.firstMessage ? { firstMessage: target.firstMessage } : {}),
@@ -90,7 +96,8 @@ export async function ensureServing(ctx: PatterContext, target: ServingTarget): 
       ...(ctx.engineInstance ? { engine: ctx.engineInstance } : {}),
     },
     ...(target.onTranscript ? { onTranscript: target.onTranscript } : {}),
-  } as never);
+  };
+  const promise = ctx.patter.serve(serveOpts);
   servingState = { mode: target.mode, promise, key };
   void logEvent({ event: 'serving_started', mode: target.mode });
   await promise;

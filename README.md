@@ -32,7 +32,7 @@ Three flows. One plugin install. Real phone calls.
 
 |   | Flow | Example |
 |---|---|---|
-| 📞 | **Claude → third party** *(killer feature)* | `/call-me +390212345678 book a table for 2 at 8pm Saturday` — Claude dials, negotiates, and reports a structured outcome. |
+| 📞 | **Claude → third party** *(killer feature)* | `/claude-call:call-me +390212345678 book a table for 2 at 8pm Saturday` — Claude dials, negotiates, and reports a structured outcome. |
 | 🔔 | **Claude → you** | `/claude-call:notify-me +393331234567` arms a Stop hook. When the long task finishes, Claude rings you with a summary you can talk back to. |
 | 📥 | **You → Claude** | Dial your Twilio number from anywhere, drop straight into a voice conversation with your active Claude Code session. |
 
@@ -90,7 +90,7 @@ Reopen Claude Code. The bundled MCP server starts automatically on session init 
 ### Step 4 — Make your first call
 
 ```
-/call-me +15551234567 say hello and confirm the line works
+/claude-call:call-me +15551234567 say hello and confirm the line works
 ```
 
 The Cloudflare tunnel spins up automatically on the first call — no webhook setup, no ngrok.
@@ -107,13 +107,13 @@ The Cloudflare tunnel spins up automatically on the first call — no webhook se
 In any Claude Code session:
 
 ```
-> /call-me +390212345678 ask if there's a table for 2 at 8pm tonight
+> /claude-call:call-me +390212345678 ask if there's a table for 2 at 8pm tonight
 ```
 
 Claude dispatches the `phone-agent` subagent, dials, has the conversation, and reports back:
 
 ```
-✓ Confirmed. Table for 2 at 20:00 tonight, under "Rosciano".
+✓ Confirmed. Table for 2 at 20:00 tonight, under "Smith".
   Transcript: 4 turns · Duration: 28s · Cost: $0.04
 ```
 
@@ -123,7 +123,7 @@ Claude dispatches the `phone-agent` subagent, dials, has the conversation, and r
 
 | Command | What it does |
 |---|---|
-| `/call-me <number> <objective>` | Outbound call to a third party with autonomous goal pursuit. |
+| `/claude-call:call-me <number> <objective>` | Outbound call to a third party with autonomous goal pursuit. |
 | `/claude-call:notify-me <number>` | Arms a Stop hook — Claude calls you when the current task finishes. |
 | `/claude-call:notify-me-cancel` | Disarms `/claude-call:notify-me`. |
 | `/claude-call:dial-me-on-blocked <number>` | Arms a Notification hook — Claude calls you whenever it stalls on permission or idle prompts. |
@@ -140,7 +140,7 @@ Numbers must be E.164 (e.g. `+393331234567`).
 ```
 ┌────────────────────────────────┐
 │  Claude Code session           │
-│  ├─ /claude-call:call, ...     │  slash commands
+│  ├─ /claude-call:call-me, ...  │  slash commands
 │  ├─ phone-agent                │  subagent (validation, parsing)
 │  └─ hooks/                     │  Stop, Notification, SessionStart, SessionEnd
 └──────────────┬─────────────────┘
@@ -177,7 +177,7 @@ The plugin layer is **<700 LOC** of shell + markdown. The bundled server (`serve
 
 ## ✦ Privacy & security
 
-- **AI disclosure on every call.** Outbound system prompts identify the agent as *"an AI assistant calling on behalf of Francesco"* on the first turn. Non-overridable in v0.2.
+- **AI disclosure on every call.** Outbound system prompts identify the agent as *"an AI assistant calling on behalf of the user"* on the first turn. Non-overridable in v0.2.
 - **Phone numbers redacted in logs** to last-4 digits.
 - **Credentials file** mode `0600` enforced — server refuses to start if it's world- or group-readable.
 - **State directory** created with mode `0700` (owner-only).

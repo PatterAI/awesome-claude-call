@@ -1,4 +1,4 @@
-import type { Tool } from 'getpatter';
+import type { Tool, LocalCallOptions } from 'getpatter';
 import { ToolError } from '../errors.js';
 import type { PatterContext } from '../patter.js';
 import { ensureServing } from '../patter.js';
@@ -8,7 +8,7 @@ import { logEvent } from '../log.js';
 const E164 = /^\+[1-9]\d{1,14}$/;
 const SYSTEM_PROMPT_MAX = 8000;
 const AI_DISCLOSURE =
-  'Identify yourself on the first turn as "an AI assistant calling on behalf of Francesco". If asked whether you are human, answer truthfully.';
+  'Identify yourself on the first turn as "an AI assistant calling on behalf of the user". If asked whether you are human, answer truthfully.';
 const DIAL_CAPTURE_TIMEOUT_MS = 30_000;
 const DEFAULT_CALL_TIMEOUT_MS = 300_000;
 
@@ -80,22 +80,66 @@ interface RecordLike {
   duration_seconds?: number;
 }
 
-function awaitCallInitiated(store: MetricsStoreLike): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      store.off('sse', listener);
-      reject(new ToolError('call_failed', `did not observe call_initiated within ${DIAL_CAPTURE_TIMEOUT_MS}ms`));
-    }, DIAL_CAPTURE_TIMEOUT_MS);
+// Module-level dial mutex. Patter SDK fires `call_initiated` SSE events on a
+// shared MetricsStore; if two `makeCall` invocations subscribed concurrently,
+// the first event would resolve BOTH listeners and call B would attribute call
+// A's transcript to itself. Serializing the dial→call_id capture critical
+// section closes that window. Mirrors `PatterTool.dialQueue` in the SDK.
+let dialMutex: Promise<unknown> = Promise.resolve();
+
+async function dialAndCapture(
+  ctx: PatterContext,
+  callOpts: LocalCallOptions,
+  store: MetricsStoreLike,
+): Promise<string> {
+  const previous = dialMutex;
+  let release!: () => void;
+  dialMutex = new Promise<void>((r) => { release = r; });
+  try {
+    await previous.catch(() => undefined);
+
+    let resolveInit!: (id: string) => void;
+    let rejectInit!: (err: unknown) => void;
+    const initiatedPromise = new Promise<string>((res, rej) => {
+      resolveInit = res;
+      rejectInit = rej;
+    });
+    // Suppress UnhandledPromiseRejection if dial fails before we await this.
+    initiatedPromise.catch(() => undefined);
+
     const listener = (event: SseEvent): void => {
       if (event.type !== 'call_initiated') return;
       const id = event.data?.call_id;
-      if (!id || typeof id !== 'string') return;
-      clearTimeout(timer);
-      store.off('sse', listener);
-      resolve(id);
+      if (typeof id === 'string' && id) resolveInit(id);
     };
     store.on('sse', listener);
-  });
+
+    const captureTimer = setTimeout(() => {
+      rejectInit(new ToolError('call_failed', `did not observe call_initiated within ${DIAL_CAPTURE_TIMEOUT_MS}ms`));
+    }, DIAL_CAPTURE_TIMEOUT_MS);
+
+    try {
+      await ctx.patter.call(callOpts);
+    } catch (err) {
+      // Detach listener and stop the timer so a failed dial doesn't leave a
+      // dangling subscription that fires the timeout 30 s later.
+      clearTimeout(captureTimer);
+      store.off('sse', listener);
+      throw err;
+    }
+
+    try {
+      const id = await initiatedPromise;
+      clearTimeout(captureTimer);
+      store.off('sse', listener);
+      return id;
+    } catch (err) {
+      store.off('sse', listener);
+      throw err;
+    }
+  } finally {
+    release();
+  }
 }
 
 function awaitCallEnd(store: MetricsStoreLike, callId: string, timeoutMs: number): Promise<RecordLike> {
@@ -152,11 +196,9 @@ export async function makeCall(ctx: PatterContext, raw: Partial<MakeCallInput>):
     throw new ToolError('call_failed', 'metricsStore is null after serve() — cannot track call lifecycle');
   }
 
-  // Subscribe BEFORE dialing so we don't miss the call_initiated event.
-  const initiatedPromise = awaitCallInitiated(store);
-
+  let callId: string;
   try {
-    await ctx.patter.call({
+    callId = await dialAndCapture(ctx, {
       to: input.to,
       agent: {
         systemPrompt,
@@ -165,23 +207,28 @@ export async function makeCall(ctx: PatterContext, raw: Partial<MakeCallInput>):
         ...(ctx.engineInstance ? { engine: ctx.engineInstance } : {}),
       },
       voicemailMessage: input.voicemail_message,
-    });
+    }, store);
   } catch (err) {
     void logEvent({ event: 'call_failed', to: input.to, error: String(err) });
     throw err;
   }
-
-  const callId = await initiatedPromise;
   void logEvent({ event: 'call_initiated', call_id: callId, to: input.to });
 
   const endData = await awaitCallEnd(store, callId, callTimeoutMs());
 
   // Prefer the full record from the store (richer than the SSE event payload).
+  // The cast trusts the SDK's `CallRecord` shape; every field we read below
+  // has a defensive fallback (`?? 'completed'`, `toMs(...) ?? Date.now()`,
+  // transcript-shape narrowing in `transcriptFromRecord`), so a SDK schema
+  // change degrades gracefully rather than crashing.
   const record = (store.getCall(callId) as RecordLike | null) ?? endData;
   const status = (record.status as CallRecord['status']) ?? 'completed';
   // The Patter SDK records `started_at` / `ended_at` as Unix seconds
   // (`Date.now() / 1e3` in MetricsStore). Convert to ms for our internal use.
-  // Heuristic for forward-compat: values > 1e11 are already ms; otherwise seconds.
+  // The 1e11 cutoff is the unambiguous separator: 1e11 seconds ≈ year 5138
+  // (so any real-world Unix-seconds value is < 1e11), and 1e11 ms ≈ Mar 1973
+  // (so any real-world Unix-ms value is > 1e11). Forward-compat with a future
+  // SDK switch to ms without breaking older records.
   const toMs = (v: unknown): number | null => {
     if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) return null;
     return v > 1e11 ? v : v * 1000;

@@ -3,11 +3,14 @@ import { logEvent } from './log.js';
 let cached;
 let servingState = null;
 function targetKey(t) {
+    // Sort tool names so reordering the input array doesn't trigger a spurious
+    // disconnect+reconnect when the agent identity is logically the same.
+    const toolNames = [...(t.tools ?? [])].map((x) => x.name).sort().join(',');
     return JSON.stringify({
         m: t.mode,
         p: t.systemPrompt,
         f: t.firstMessage ?? '',
-        tn: (t.tools ?? []).map((x) => x.name).join(','),
+        tn: toolNames,
     });
 }
 export function buildPatter(creds) {
@@ -56,7 +59,7 @@ export async function ensureServing(ctx, target) {
         }
         servingState = null;
     }
-    const promise = ctx.patter.serve({
+    const serveOpts = {
         agent: {
             systemPrompt: target.systemPrompt,
             ...(target.firstMessage ? { firstMessage: target.firstMessage } : {}),
@@ -64,7 +67,8 @@ export async function ensureServing(ctx, target) {
             ...(ctx.engineInstance ? { engine: ctx.engineInstance } : {}),
         },
         ...(target.onTranscript ? { onTranscript: target.onTranscript } : {}),
-    });
+    };
+    const promise = ctx.patter.serve(serveOpts);
     servingState = { mode: target.mode, promise, key };
     void logEvent({ event: 'serving_started', mode: target.mode });
     await promise;

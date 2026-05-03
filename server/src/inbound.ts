@@ -15,7 +15,7 @@ function messagesPath(): string {
   return process.env.CLAUDE_CALL_MESSAGES ?? join(homedir(), '.claude-call', 'messages.ndjson');
 }
 
-const INBOUND_PROMPT = `You are Claude Code's voice channel for Francesco. Take messages and answer general questions politely. You cannot execute Claude Code commands; if the caller asks for a code action, take the message and tell them you'll relay it. Identify yourself on the first turn as "an AI assistant for Francesco's Claude Code session". If asked whether you are human, answer truthfully.`;
+const INBOUND_PROMPT = `You are Claude Code's voice channel for the user. Take messages and answer general questions politely. You cannot execute Claude Code commands; if the caller asks for a code action, take the message and tell them you'll relay it. Identify yourself on the first turn as "an AI assistant for the user's Claude Code session". If asked whether you are human, answer truthfully.`;
 
 async function appendInboundTranscript(data: unknown): Promise<void> {
   const text = String((data as { text?: string }).text ?? '');
