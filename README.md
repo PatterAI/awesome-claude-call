@@ -13,9 +13,9 @@
 Make outbound calls, get rung when work is done, talk to your agent from anywhere.</p>
 
 <p>
-  <a href="https://github.com/FrancescoRosciano/claude-call/releases/tag/v0.2.2"><img alt="version" src="https://img.shields.io/badge/version-0.2.2-1f6feb?style=flat-square" /></a>
+  <a href="https://github.com/PatterAI/awesome-claude-call/releases/tag/v0.2.2"><img alt="version" src="https://img.shields.io/badge/version-0.2.2-1f6feb?style=flat-square" /></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-1a7f37?style=flat-square" /></a>
-  <a href="https://github.com/FrancescoRosciano/claude-call/actions"><img alt="ci" src="https://img.shields.io/badge/ci-passing-1a7f37?style=flat-square" /></a>
+  <a href="https://github.com/PatterAI/awesome-claude-call/actions"><img alt="ci" src="https://img.shields.io/badge/ci-passing-1a7f37?style=flat-square" /></a>
   <img alt="tests" src="https://img.shields.io/badge/tests-43%2B26-1a7f37?style=flat-square" />
   <a href="https://github.com/PatterAI/patter-mcp"><img alt="powered by patter" src="https://img.shields.io/badge/powered_by-Patter-d946a3?style=flat-square" /></a>
 </p>
@@ -63,7 +63,7 @@ That's it. The wizard wires both in for you.
 Open any Claude Code session (terminal, desktop app, or IDE extension) and run:
 
 ```
-/plugin marketplace add https://github.com/FrancescoRosciano/claude-call
+/plugin marketplace add https://github.com/PatterAI/awesome-claude-call
 /plugin install claude-call@claude-call
 ```
 
