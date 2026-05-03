@@ -71,7 +71,7 @@ const TOOLS = [
     },
 ];
 export async function startMcpServer() {
-    const server = new Server({ name: 'claude-call', version: '0.2.2' }, { capabilities: { tools: {} } });
+    const server = new Server({ name: 'claude-call', version: '0.2.3' }, { capabilities: { tools: {} } });
     let ctxPromise;
     async function getCtx() {
         if (!ctxPromise) {
