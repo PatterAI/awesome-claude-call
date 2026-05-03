@@ -4,6 +4,11 @@ All notable changes to claude-call are documented here. Format: [Keep a Changelo
 
 ## [Unreleased]
 
+## [0.2.3] — 2026-05-03
+
+### Fixed
+- **Second outbound call (or any call after an agent-identity change) crashed with `Cannot use both tunnel: true and webhookUrl. Pick one.`** Root cause is in the bundled `getpatter@0.5.4` SDK: `Patter.serve()` starts the Cloudflare tunnel and stores the tunnel hostname in `this.localConfig.webhookUrl`; `Patter.disconnect()` stops the tunnel handle and embedded server but never clears `localConfig.webhookUrl`. The next `serve()` then sees `wantsCloudflared && webhookUrl` and throws. Symptom: the very first call could succeed, but any later call with a different agent identity (different `system_prompt`, `first_message`, or tool set) tripped `ensureServing` → `disconnect()` → `serve()`, and the `serve()` failed before any dial-out. Also affected `/claude-call:serve-me` switching between inbound and outbound modes. Workaround landed in `server/src/patter.ts`: added `clearStalePatterWebhookUrl(patter)` that reaches into the SDK's internal `localConfig` and resets `webhookUrl` to `undefined` after every `disconnect()` (in `ensureServing`, `stopServing`, and `disposePatter`). Added two regression tests in `server/tests/unit/patter.test.ts`. To be removed when getpatter ships an upstream fix.
+
 ## [0.2.2] — 2026-05-02
 
 ### Fixed

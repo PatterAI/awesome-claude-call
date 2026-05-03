@@ -149,3 +149,47 @@ describe('patter.ts — currentServingMode', () => {
     assert.equal(currentServingMode(), null);
   });
 });
+
+describe('patter.ts — getpatter stale webhookUrl workaround', () => {
+  beforeEach(() => __resetForTests());
+
+  // Regression for getpatter <=0.5.4: Patter.disconnect() leaves
+  // localConfig.webhookUrl set to the prior tunnel hostname, which makes the
+  // next serve() throw "Cannot use both tunnel: true and webhookUrl. Pick one."
+  // ensureServing must clear the stale value after each disconnect.
+  function fakeCtxWithLocalConfig(): {
+    ctx: PatterContext;
+    patter: { localConfig: { webhookUrl?: string } };
+  } {
+    const patter = {
+      serve: async (): Promise<void> => undefined,
+      disconnect: async (): Promise<void> => undefined,
+      metricsStore: null,
+      localConfig: { webhookUrl: 'stale.tunnel.example' as string | undefined },
+    };
+    const ctx = {
+      patter,
+      engine: 'openai_realtime',
+      phoneNumber: '+15551234567',
+      engineInstance: undefined,
+      credentials: {},
+    } as unknown as PatterContext;
+    return { ctx, patter };
+  }
+
+  it('clears stale webhookUrl after disconnect on agent identity change', async () => {
+    const { ctx, patter } = fakeCtxWithLocalConfig();
+    await ensureServing(ctx, { mode: 'outbound', systemPrompt: 'first' });
+    // Sanity: the workaround does NOT clear before a disconnect happens.
+    assert.equal(patter.localConfig.webhookUrl, 'stale.tunnel.example');
+    await ensureServing(ctx, { mode: 'outbound', systemPrompt: 'second' });
+    assert.equal(patter.localConfig.webhookUrl, undefined);
+  });
+
+  it('clears stale webhookUrl after stopServing', async () => {
+    const { ctx, patter } = fakeCtxWithLocalConfig();
+    await ensureServing(ctx, { mode: 'inbound', systemPrompt: 'p' });
+    await stopServing(ctx);
+    assert.equal(patter.localConfig.webhookUrl, undefined);
+  });
+});
