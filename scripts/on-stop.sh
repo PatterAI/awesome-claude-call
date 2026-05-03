@@ -27,11 +27,11 @@ number="$(jq -r '.number' "$flag_file")"
 # Truncate summary to 500 chars to keep the system prompt tight.
 summary="${last_msg:0:500}"
 
-system_prompt="You are an AI assistant calling on behalf of the user. Identify yourself as such on the first turn. Francesco asked to be notified when the current task finished. Read this summary, then offer to take follow-up questions:
+system_prompt="You are an AI assistant calling on behalf of the user. Identify yourself as such on the first turn. The user asked to be notified when the current task finished. Read this summary, then offer to take follow-up questions:
 
 ${summary}"
 
-first_message="Hi Francesco, this is your AI assistant. Your task just finished — got a moment for the summary?"
+first_message="Hi, this is your AI assistant. Your task just finished — got a moment for the summary?"
 
 queue_dir="${CLAUDE_CALL_FIRE_QUEUE:-$HOME/.claude-call/fire-queue}"
 mkdir -m 0700 -p "$queue_dir"
