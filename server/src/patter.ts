@@ -33,6 +33,22 @@ export interface ServingTarget {
 let cached: PatterContext | undefined;
 let servingState: { mode: ServingMode; promise: Promise<void>; key: string } | null = null;
 
+/**
+ * Workaround for getpatter <=0.5.4: `Patter.disconnect()` stops the tunnel
+ * handle but leaves `localConfig.webhookUrl` set to the prior tunnel's
+ * hostname. The next `serve()` then trips the `tunnel + webhookUrl` guard
+ * and throws "Cannot use both tunnel: true and webhookUrl. Pick one."
+ *
+ * Reach into the SDK's internal state after each disconnect and clear it.
+ * Remove this when getpatter ships a fix in disconnect().
+ */
+function clearStalePatterWebhookUrl(patter: Patter): void {
+  const internal = patter as unknown as { localConfig?: { webhookUrl?: string } };
+  if (internal.localConfig && internal.localConfig.webhookUrl !== undefined) {
+    internal.localConfig = { ...internal.localConfig, webhookUrl: undefined };
+  }
+}
+
 function targetKey(t: ServingTarget): string {
   // Sort tool names so reordering the input array doesn't trigger a spurious
   // disconnect+reconnect when the agent identity is logically the same.
@@ -86,6 +102,7 @@ export async function ensureServing(ctx: PatterContext, target: ServingTarget): 
     } catch (err) {
       void logEvent({ event: 'serving_disconnect_failed', error: err instanceof Error ? err.message : String(err) });
     }
+    clearStalePatterWebhookUrl(ctx.patter);
     servingState = null;
   }
   const serveOpts: ServeOptions = {
@@ -111,6 +128,7 @@ export async function stopServing(ctx: PatterContext): Promise<void> {
   } catch (err) {
     void logEvent({ event: 'serving_disconnect_failed', error: err instanceof Error ? err.message : String(err) });
   }
+  clearStalePatterWebhookUrl(ctx.patter);
   servingState = null;
   void logEvent({ event: 'serving_stopped' });
 }
@@ -126,6 +144,7 @@ export async function disposePatter(): Promise<void> {
   } catch (err) {
     void logEvent({ event: 'patter_dispose_error', error: String(err) });
   }
+  clearStalePatterWebhookUrl(cached.patter);
   cached = undefined;
   servingState = null;
 }
