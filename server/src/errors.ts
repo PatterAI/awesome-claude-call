@@ -3,6 +3,7 @@ export type ToolErrorCode =
   | 'credentials_invalid'
   | 'twilio_auth_failed'
   | 'tunnel_failed'
+  | 'call_failed'
   | 'invalid_input'
   | 'not_found'
   | 'internal';

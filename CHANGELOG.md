@@ -4,6 +4,30 @@ All notable changes to claude-call are documented here. Format: [Keep a Changelo
 
 ## [Unreleased]
 
+## [0.2.2] — 2026-05-02
+
+### Fixed
+- **Outbound calls dropped immediately with `duration_seconds: 0` and an empty transcript.** Three compounding root causes, found by tracing the Patter SDK source:
+  1. **No tunnel for outbound.** `make_call.ts` called `patter.call()` directly without ever calling `patter.serve()`. The SDK only spawns the Cloudflare tunnel inside `serve()`, so Twilio had no public webhook to deliver call audio to. Added a `serve()` step before every dial.
+  2. **The `agent` argument to `phone.call()` is ignored by the SDK.** Inspecting `getpatter`'s `Patter.call()` shows the TwiML it generates points Twilio at the same `/ws/stream/outbound` endpoint that the embedded server already serves with the `serve()`-time agent. So to dial with a custom agent, we must `serve({agent})` with that agent first. Added `ensureServing(ctx, target)` in `server/src/patter.ts` keyed on the agent identity (mode + systemPrompt + firstMessage + tool names); it disconnects and re-spawns the tunnel only when the agent actually changes, no-ops otherwise.
+  3. **`patter.call()` returns when Twilio accepts the dial — not when the call ends.** `make_call.ts` was reading `metricsStore.getCalls()` immediately after, which returned empty (call still active). Replaced with the documented SDK pattern: subscribe to `metricsStore`'s `sse` event for `call_initiated` (capture the real Twilio call_id) and `call_end` (resolves with the completed record). Verified end-to-end: a real outbound call now produces a real `CA…` call_id and a multi-turn transcript.
+- **Race between the inbound watcher and outbound calls.** The watcher's `setInterval` fires every 1s; without re-entry guarding, concurrent ticks could fan out and call `stopServing()` on a tunnel `make_call` had just spawned. Added an in-flight promise guard so only one transition runs at a time, and switched the watcher to consult `currentServingMode()` instead of a stale `lastDesired` cache so it never tears down state owned by `make_call`.
+- **Wrong unit on `duration_seconds`.** The Patter SDK records `started_at` / `ended_at` as Unix **seconds** (`Date.now() / 1e3`), but `make_call.ts` was treating them as milliseconds and dividing by 1000 — yielding 0 for short calls. Added a magnitude heuristic: values > 1e11 are ms, otherwise seconds.
+- **`/call`, `/notify-me`, `/calls`, etc. were "Unknown command".** Plugin slash commands are namespaced — the actual names are `/claude-call:call`, `/claude-call:notify-me`, etc. Fixed every reference in `README.md`, `commands/setup.md` (the success message), and the docs/diagrams to use the namespaced form.
+- **`commands/call.md` and `commands/calls.md` shelled out to `${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh`** — that script was deleted in v0.2.0 (this CHANGELOG, [0.2.0] § Removed). Removed the dead invocations.
+- **`commands/call.md` and `commands/calls.md` named `mcp__patter-mcp__*` MCP tools** — the server was renamed to `claude-call` in v0.2.0. Updated to the current names.
+- **`agents/phone-agent.md` declared `tools: mcp__claude-call__*`** — when installed via the plugin loader the actual exposed names are `mcp__plugin_claude-call_claude-call__*`, so the subagent could not reach any of its declared tools and outbound dispatch silently failed. Updated the `tools:` list to the verified-working long-form names.
+
+### Added
+- **`/claude-call:setup` Step 1.5** — "Import from `.env` file" branch. The wizard accepts an absolute path to an existing `.env` file, parses out the standard Twilio + OpenAI / ElevenLabs / Deepgram keys, and skips the per-key prompts. Falls back to manual entry on missing or invalid required keys.
+- **`call_failed` `ToolErrorCode`** — distinct error code for telephony-layer failures (no `call_initiated` event within 30 s, `call_end` timeout exceeded, `metricsStore` null after `serve()`). Surfaces actionable diagnostics rather than the generic `internal`.
+- **`CLAUDE_CALL_TIMEOUT_MS` env override** — caps how long an individual call may run before `make_call` rejects with `call_failed`. Default 5 minutes.
+- **README "Requirements" section** — explicit minimum (Twilio + OpenAI) vs. optional alternatives (ElevenLabs, pipeline mode), per user feedback.
+- **README "How it works"** — note that the Cloudflare tunnel auto-starts on first call; no ngrok or manual webhook setup.
+
+### Changed
+- **`/claude-call:serve-me` and `/claude-call:serve-me-cancel` semantics simplified.** Previously the inbound watcher unconditionally `disconnect()`ed when the flag was removed, even if `make_call` was mid-dial — killing the live call. Now the watcher only acts on transitions it owns (`'inbound'` mode), tracked via `currentServingMode()`, never on `'outbound'` state owned by `make_call`. After an outbound call ends, the next watcher tick re-arms inbound automatically if `~/.claude-call/inbound-armed` is still set.
+
 ## [0.2.1] — 2026-04-29
 
 ### Fixed

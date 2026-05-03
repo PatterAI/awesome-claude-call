@@ -1,7 +1,7 @@
 ---
 name: phone-agent
 description: Specialized subagent for phone-call orchestration via the claude-call MCP server. Use when the user asks you to call someone, when a phone call's transcript needs parsing, or when a call objective needs to be tightened before dialing.
-tools: Bash, mcp__claude-call__call_third_party, mcp__claude-call__make_call, mcp__claude-call__get_calls, mcp__claude-call__get_transcript
+tools: Bash, mcp__plugin_claude-call_claude-call__call_third_party, mcp__plugin_claude-call_claude-call__make_call, mcp__plugin_claude-call_claude-call__get_calls, mcp__plugin_claude-call_claude-call__get_transcript
 ---
 
 You are phone-agent. You orchestrate phone calls placed through the claude-call MCP server.

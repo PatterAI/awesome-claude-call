@@ -1,6 +1,15 @@
 import { Patter, Twilio, OpenAIRealtime, ElevenLabsConvAI, CloudflareTunnel, } from 'getpatter';
 import { logEvent } from './log.js';
 let cached;
+let servingState = null;
+function targetKey(t) {
+    return JSON.stringify({
+        m: t.mode,
+        p: t.systemPrompt,
+        f: t.firstMessage ?? '',
+        tn: (t.tools ?? []).map((x) => x.name).join(','),
+    });
+}
 export function buildPatter(creds) {
     if (cached && cached.credentials === creds)
         return cached;
@@ -21,6 +30,61 @@ export function buildPatter(creds) {
     void logEvent({ event: 'patter_built', engine: creds.VOICE_ENGINE });
     return cached;
 }
+/**
+ * Ensure the bundled Patter server is serving with the given agent.
+ *
+ * The SDK stores exactly one agent per `serve()` call (`embeddedServer.this.agent`).
+ * The agent passed to `phone.call()` is currently ignored by the SDK — the
+ * webhook routes ALL audio to the serving agent. So to place an outbound call
+ * with a custom agent, we must serve() with that agent first.
+ *
+ * If already serving with the same agent identity (mode + prompt + firstMessage
+ * + tool names), this is a no-op. Otherwise it disconnects the prior tunnel
+ * and re-spawns with the new agent — costs ~3-5s for Cloudflare to bind.
+ */
+export async function ensureServing(ctx, target) {
+    const key = targetKey(target);
+    if (servingState?.key === key)
+        return servingState.promise;
+    if (servingState) {
+        await servingState.promise.catch(() => undefined);
+        try {
+            await ctx.patter.disconnect();
+        }
+        catch (err) {
+            void logEvent({ event: 'serving_disconnect_failed', error: err instanceof Error ? err.message : String(err) });
+        }
+        servingState = null;
+    }
+    const promise = ctx.patter.serve({
+        agent: {
+            systemPrompt: target.systemPrompt,
+            ...(target.firstMessage ? { firstMessage: target.firstMessage } : {}),
+            ...(target.tools ? { tools: target.tools } : {}),
+            ...(ctx.engineInstance ? { engine: ctx.engineInstance } : {}),
+        },
+        ...(target.onTranscript ? { onTranscript: target.onTranscript } : {}),
+    });
+    servingState = { mode: target.mode, promise, key };
+    void logEvent({ event: 'serving_started', mode: target.mode });
+    await promise;
+}
+export async function stopServing(ctx) {
+    if (!servingState)
+        return;
+    await servingState.promise.catch(() => undefined);
+    try {
+        await ctx.patter.disconnect();
+    }
+    catch (err) {
+        void logEvent({ event: 'serving_disconnect_failed', error: err instanceof Error ? err.message : String(err) });
+    }
+    servingState = null;
+    void logEvent({ event: 'serving_stopped' });
+}
+export function currentServingMode() {
+    return servingState?.mode ?? null;
+}
 export async function disposePatter() {
     if (!cached)
         return;
@@ -31,4 +95,9 @@ export async function disposePatter() {
         void logEvent({ event: 'patter_dispose_error', error: String(err) });
     }
     cached = undefined;
+    servingState = null;
+}
+export function __resetForTests() {
+    cached = undefined;
+    servingState = null;
 }
