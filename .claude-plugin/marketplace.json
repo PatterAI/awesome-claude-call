@@ -10,7 +10,7 @@
       "name": "claude-call",
       "source": "./",
       "description": "Two-way voice bridge for Claude Code via Patter",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "category": "communication",
       "tags": ["voice", "phone", "telephony", "patter"]
     }
