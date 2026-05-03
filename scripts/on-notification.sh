@@ -26,11 +26,11 @@ flag_file="${state_dir}/dial-me-on-blocked.${sid}.json"
 number="$(jq -r '.number' "$flag_file")"
 
 context="${message:0:400}"
-system_prompt="You are an AI assistant calling on behalf of the user. Identify yourself as such on the first turn. Claude Code stalled with a ${matcher}. Tell Francesco the question/blocker and gather his answer:
+system_prompt="You are an AI assistant calling on behalf of the user. Identify yourself as such on the first turn. Claude Code stalled with a ${matcher}. Tell the user the question/blocker and gather their answer:
 
 ${context}"
 
-first_message="Hi Francesco, your AI assistant. Claude needs your input on something — got a sec?"
+first_message="Hi, this is your AI assistant. Claude needs your input on something — got a sec?"
 
 queue_dir="${CLAUDE_CALL_FIRE_QUEUE:-$HOME/.claude-call/fire-queue}"
 mkdir -m 0700 -p "$queue_dir"
