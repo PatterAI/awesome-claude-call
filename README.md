@@ -32,7 +32,7 @@ Three flows. One plugin install. Real phone calls.
 
 |   | Flow | Example |
 |---|---|---|
-| 📞 | **Claude → third party** *(killer feature)* | `/claude-call:call +390212345678 book a table for 2 at 8pm Saturday` — Claude dials, negotiates, and reports a structured outcome. |
+| 📞 | **Claude → third party** *(killer feature)* | `/call-me +390212345678 book a table for 2 at 8pm Saturday` — Claude dials, negotiates, and reports a structured outcome. |
 | 🔔 | **Claude → you** | `/claude-call:notify-me +393331234567` arms a Stop hook. When the long task finishes, Claude rings you with a summary you can talk back to. |
 | 📥 | **You → Claude** | Dial your Twilio number from anywhere, drop straight into a voice conversation with your active Claude Code session. |
 
@@ -56,17 +56,49 @@ That's it. The wizard wires both in for you.
 
 <br/>
 
-## ✦ Quick install
+## ✦ Adding to Claude Code
 
-In any Claude Code session:
+### Step 1 — Install the plugin
+
+Open any Claude Code session (terminal, desktop app, or IDE extension) and run:
 
 ```
 /plugin marketplace add https://github.com/FrancescoRosciano/claude-call
 /plugin install claude-call@claude-call
+```
+
+This clones the plugin into `~/.claude/plugins/` and registers its MCP server, slash commands, and hooks. No `npm install` needed — the bundled server ships with pre-built `dist/` files.
+
+### Step 2 — Configure credentials
+
+```
 /claude-call:setup
 ```
 
-The `/claude-call:setup` wizard collects your Twilio + OpenAI credentials (or imports them from an existing `.env` file you point at), writes them to `~/.claude-call/credentials` (mode 0600), and runs a connectivity check before you can place calls.
+The wizard asks for your Twilio Account SID, Auth Token, and phone number, plus an OpenAI API key for the voice engine. If you already have a `.env` file with those keys, the wizard can import them directly — just provide the absolute path when prompted.
+
+Credentials are written to `~/.claude-call/credentials` (mode `0600`) and never stored anywhere else.
+
+### Step 3 — Restart the session
+
+```
+/exit
+```
+
+Reopen Claude Code. The bundled MCP server starts automatically on session init and picks up the new credentials.
+
+### Step 4 — Make your first call
+
+```
+/call-me +15551234567 say hello and confirm the line works
+```
+
+The Cloudflare tunnel spins up automatically on the first call — no webhook setup, no ngrok.
+
+---
+
+> **Already have credentials?** Skip to Step 3.
+> **Updating an existing install?** Re-run `/claude-call:setup` to overwrite credentials, then `/exit` to restart.
 
 <br/>
 
@@ -75,7 +107,7 @@ The `/claude-call:setup` wizard collects your Twilio + OpenAI credentials (or im
 In any Claude Code session:
 
 ```
-> /claude-call:call +390212345678 ask if there's a table for 2 at 8pm tonight
+> /call-me +390212345678 ask if there's a table for 2 at 8pm tonight
 ```
 
 Claude dispatches the `phone-agent` subagent, dials, has the conversation, and reports back:
@@ -91,7 +123,7 @@ Claude dispatches the `phone-agent` subagent, dials, has the conversation, and r
 
 | Command | What it does |
 |---|---|
-| `/claude-call:call <number> <objective>` | Outbound call to a third party with autonomous goal pursuit. |
+| `/call-me <number> <objective>` | Outbound call to a third party with autonomous goal pursuit. |
 | `/claude-call:notify-me <number>` | Arms a Stop hook — Claude calls you when the current task finishes. |
 | `/claude-call:notify-me-cancel` | Disarms `/claude-call:notify-me`. |
 | `/claude-call:dial-me-on-blocked <number>` | Arms a Notification hook — Claude calls you whenever it stalls on permission or idle prompts. |
