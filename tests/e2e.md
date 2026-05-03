@@ -16,7 +16,7 @@ Run before each release. Costs ~$0.05 per test call.
 1. In a new session: `/call <your-own-number> ask whether I can hear you and then say goodbye`
 2. Expected: Claude dispatches phone-agent. Phone-agent calls `mcp__patter-mcp__call_third_party`. Your phone rings within ~5s.
 3. Pick up. Verify the agent:
-   - Identifies as "an AI assistant calling on behalf of Francesco"
+   - Identifies as "an AI assistant calling on behalf of the user"
    - Asks "can you hear me?"
    - Says goodbye when you confirm
 4. Hang up. Within 1-2s the parent Claude session reports the outcome with a transcript snippet.
