@@ -3,6 +3,8 @@
 *.log
 node_modules/
 dist/
+.claude/
+CLAUDE.md
 # server/dist/ ships with the plugin (Claude Code copies the repo verbatim into its cache):
 !server/dist/
 !server/dist/**
@@ -11,3 +13,10 @@ dist/
 .vscode/
 *.bats.tmp
 tests/.tmp/
+
+docs/ 
+docs/**
+*.md
+
+.env
+.env.*
