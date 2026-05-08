@@ -1,0 +1,50 @@
+name: Bug report
+description: A reproducible defect in the plugin or the bundled MCP server.
+title: "[bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing. Please redact phone numbers, Twilio Account SIDs, and OpenAI keys before posting.
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      description: Output of `/plugin list` or the `version` field in `.claude-plugin/plugin.json`.
+      placeholder: "0.2.4"
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: "macOS 15.4 / Linux Ubuntu 24.04"
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      placeholder: "20.18.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: One sentence on the symptom, then steps to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log lines
+      description: From `~/.claude-call/log.ndjson`. Phone numbers should already be redacted to last-4.
+      render: shell

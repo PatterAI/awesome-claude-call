@@ -1,0 +1,59 @@
+name: Publish landing page to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'landing/**'
+      - 'assets/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble _site/
+        run: |
+          set -euxo pipefail
+          mkdir -p _site
+          # Landing page becomes the site root.
+          cp landing/index.html _site/index.html
+          cp landing/robots.txt _site/robots.txt
+          cp landing/sitemap.xml _site/sitemap.xml
+          cp landing/og.png _site/og.png
+          # Brand + design assets, accessible at /assets/...
+          mkdir -p _site/assets
+          cp -R assets/brand _site/assets/brand
+          cp -R assets/design _site/assets/design
+          # Skip Jekyll processing.
+          touch _site/.nojekyll
+          ls -la _site
+          ls -la _site/assets
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

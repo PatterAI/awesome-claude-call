@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: claude-call
+message: >-
+  If you reference this software in academic or technical work,
+  please use the metadata below.
+type: software
+authors:
+  - name: PatterAI
+    website: 'https://github.com/PatterAI'
+repository-code: 'https://github.com/PatterAI/awesome-claude-call'
+url: 'https://patterai.github.io/awesome-claude-call/'
+abstract: >-
+  A Claude Code plugin that gives Claude a phone number. Outbound voice
+  calls, inbound voice calls, and ring-when-done notifications, built on
+  the Patter SDK over Twilio and OpenAI Realtime / ElevenLabs ConvAI.
+keywords:
+  - claude-code
+  - claude-code-plugin
+  - mcp-server
+  - voice-ai
+  - voice-agent
+  - twilio
+  - openai-realtime
+  - elevenlabs
+  - telephony
+  - anthropic
+license: MIT
+version: 0.2.4
+date-released: '2026-05-08'

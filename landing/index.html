@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>claude-call — Give Claude Code a phone number</title>
+<meta name="description" content="A Claude Code plugin that gives Claude a phone number. Outbound voice calls, inbound voice calls, and ring-when-done notifications, built on the Patter SDK over Twilio + OpenAI Realtime.">
+<meta name="keywords" content="claude code, claude code plugin, mcp server, voice ai, ai phone agent, twilio, openai realtime, elevenlabs, telephony, anthropic, voice agent, patter">
+<meta name="author" content="PatterAI">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)">
+
+<link rel="canonical" href="https://patterai.github.io/awesome-claude-call/">
+<link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
+<link rel="alternate icon" href="assets/brand/patter-mark.png">
+<link rel="apple-touch-icon" href="assets/brand/patter-mark.png">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="claude-call">
+<meta property="og:title" content="claude-call — Give Claude Code a phone number">
+<meta property="og:description" content="A Claude Code plugin: outbound calls, inbound calls, ring-when-done notifications. Powered by Patter, Twilio, and OpenAI Realtime.">
+<meta property="og:url" content="https://patterai.github.io/awesome-claude-call/">
+<meta property="og:image" content="https://patterai.github.io/awesome-claude-call/og.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="claude-call wordmark on a dot-grid background, with a peach square framing a hand-drawn telephone receiver.">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="claude-call — Give Claude Code a phone number">
+<meta name="twitter:description" content="A Claude Code plugin: outbound calls, inbound calls, ring-when-done notifications.">
+<meta name="twitter:image" content="https://patterai.github.io/awesome-claude-call/og.png">
+<meta name="twitter:image:alt" content="claude-call wordmark on dot-grid.">
+
+<!-- JSON-LD: SoftwareApplication + SoftwareSourceCode -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "claude-call",
+      "alternateName": "awesome-claude-call",
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "ClaudeCodePlugin",
+      "operatingSystem": "macOS, Linux",
+      "description": "A Claude Code plugin that gives Claude a phone number. Outbound voice calls, inbound voice calls, and ring-when-done notifications.",
+      "url": "https://patterai.github.io/awesome-claude-call/",
+      "downloadUrl": "https://github.com/PatterAI/awesome-claude-call",
+      "softwareVersion": "0.2.4",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": { "@type": "Organization", "name": "PatterAI", "url": "https://github.com/PatterAI" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "awesome-claude-call",
+      "codeRepository": "https://github.com/PatterAI/awesome-claude-call",
+      "programmingLanguage": ["TypeScript", "Bash", "Markdown"],
+      "runtimePlatform": "Node.js 20+",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": { "@type": "Organization", "name": "PatterAI" }
+    }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="assets/design/colors_and_type.css">
+
+<style>
+*,*::before,*::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+a:hover { opacity: 0.7; }
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 var(--s-5); }
+section.band { padding: var(--s-9) 0; border-top: 1px solid var(--line); }
+section.band.first { border-top: 0; }
+section.band.cream { background: var(--bg-cream); }
+section.band.dotted { background-image: var(--dot-grid); background-size: var(--dot-grid-size); background-color: var(--bg); }
+
+.eyebrow { font-family: var(--font-mono); font-size: var(--fs-12); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: var(--s-3); }
+
+.topnav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 var(--s-5); background: rgba(255,255,255,0.92); backdrop-filter: saturate(180%) blur(8px); -webkit-backdrop-filter: saturate(180%) blur(8px); border-bottom: 1px solid var(--line); }
+.topnav .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; text-decoration: none; }
+.topnav .brand img { height: 22px; width: auto; }
+.topnav .brand .badge { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--ink-muted); background: var(--bg-cream); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); margin-left: 8px; }
+.topnav nav { display: flex; gap: var(--s-5); align-items: center; }
+.topnav nav a { color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; }
+.topnav .ghbtn { font-family: var(--font-mono); font-size: 13px; font-weight: 500; padding: 7px 14px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); text-decoration: none; transition: background var(--motion-fast) var(--easing), color var(--motion-fast) var(--easing); }
+.topnav .ghbtn:hover { background: var(--ink); color: var(--bg); opacity: 1; }
+@media (max-width: 720px) { .topnav nav a:not(.ghbtn) { display: none; } }
+
+.hero { padding: var(--s-9) 0 var(--s-9); position: relative; overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-7); align-items: center; }
+@media (min-width: 960px) { .hero-grid { grid-template-columns: 1.1fr 1fr; } }
+.hero h1 { font-family: var(--font-sans); font-weight: 700; font-size: clamp(48px, 8vw, 96px); line-height: 0.98; letter-spacing: -0.02em; margin: 0 0 var(--s-4); }
+.hero h1 .accent { color: var(--peach-deep); }
+.hero p.lead { font-size: var(--fs-20); line-height: 1.5; color: var(--fg-secondary); max-width: 36ch; margin: 0 0 var(--s-5); }
+.hero .install { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border: 1.5px solid var(--ink); border-radius: var(--r-3); background: var(--bg); font-family: var(--font-mono); font-size: 14px; max-width: 560px; }
+.hero .install .glyph { color: var(--peach-deep); font-weight: 700; }
+.hero .install code { background: transparent; border: 0; padding: 0; }
+.hero .ctas { display: flex; gap: 10px; margin-top: var(--s-5); flex-wrap: wrap; }
+.btn { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; padding: 12px 18px; border-radius: 999px; border: 1.5px solid var(--ink); text-decoration: none; transition: background var(--motion-fast) var(--easing), color var(--motion-fast) var(--easing), transform var(--motion-fast) var(--easing); }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.primary:hover { background: var(--peach); color: var(--ink); border-color: var(--ink); opacity: 1; transform: translateY(-1px); }
+.btn.ghost { background: var(--bg); color: var(--ink); }
+.btn.ghost:hover { background: var(--bg-cream); opacity: 1; }
+.hero .stamp { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-top: var(--s-4); }
+
+.stack-illust { display: flex; align-items: center; justify-content: center; padding: var(--s-5); }
+.stack { position: relative; width: min(420px, 100%); aspect-ratio: 1.1 / 1; }
+.tile { position: absolute; left: 0; right: 0; height: 56%; border: 2px solid var(--ink); border-radius: var(--r-5); display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-family: var(--font-sans); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+.tile .num { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.12em; }
+.tile-1 { top: 0; background: var(--bg); transform: translateY(0%); }
+.tile-2 { top: 22%; background: var(--peach); }
+.tile-3 { top: 44%; background: var(--bg-cream); }
+
+.flows { display: grid; grid-template-columns: 1fr; gap: var(--s-4); }
+@media (min-width: 800px) { .flows { grid-template-columns: repeat(3, 1fr); } }
+.flow { background: var(--bg); border: 1.5px solid var(--ink); border-radius: var(--r-5); padding: var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); min-height: 240px; transition: transform var(--motion-fast) var(--easing); }
+.flow:hover { transform: translateY(-2px); }
+.flow.accent { background: var(--peach); }
+.flow .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); opacity: 0.7; }
+.flow h3 { font-family: var(--font-sans); font-weight: 700; font-size: 24px; letter-spacing: -0.01em; margin: 0; }
+.flow p { font-size: 15px; line-height: 1.55; color: var(--fg-secondary); margin: 0; }
+.flow .cmd { font-family: var(--font-mono); font-size: 12px; padding: 8px 12px; background: var(--bg); border: 1px solid var(--ink); border-radius: var(--r-2); align-self: flex-start; }
+.flow.accent .cmd { background: var(--bg-warm); }
+
+.terminal { border: 1.5px solid var(--ink); border-radius: var(--r-3); overflow: hidden; background: var(--bg); }
+.terminal .titlebar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--bg-cream); font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.terminal .dot { width: 9px; height: 9px; border-radius: 50%; }
+.terminal .dot.r { background: #ff5d56; }
+.terminal .dot.y { background: #ffbd2e; }
+.terminal .dot.g { background: #27c93f; }
+.terminal .titlebar .label { margin-left: auto; }
+.terminal pre { margin: 0; padding: 18px 22px; font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--ink-2); overflow-x: auto; }
+.terminal pre .prompt { color: var(--peach-deep); }
+.terminal pre .arg { color: var(--ink); font-weight: 600; }
+.terminal pre .cm { color: var(--ink-muted); font-style: italic; }
+.terminal pre .ok { color: #27c93f; }
+.terminal pre .out { color: var(--fg-secondary); }
+.terminal pre .accent { color: var(--peach-deep); font-weight: 600; }
+
+.cmd-table { width: 100%; border-collapse: collapse; border: 1.5px solid var(--ink); border-radius: var(--r-3); overflow: hidden; background: var(--bg); }
+.cmd-table th, .cmd-table td { text-align: left; padding: 14px 18px; vertical-align: top; }
+.cmd-table th { background: var(--bg-cream); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); border-bottom: 2px solid var(--ink); }
+.cmd-table td { border-top: 1px solid var(--line); font-size: 15px; line-height: 1.55; color: var(--fg-secondary); }
+.cmd-table td.name { font-family: var(--font-mono); font-size: 13px; color: var(--ink); white-space: nowrap; padding-right: var(--s-5); }
+.cmd-table tr:first-child td { border-top: 0; }
+@media (max-width: 700px) { .cmd-table td.name { white-space: normal; } }
+
+.flow-ascii { font-family: var(--font-mono); font-size: 13px; line-height: 1.65; padding: 22px; background: var(--bg); border: 1.5px solid var(--ink); border-radius: var(--r-3); overflow-x: auto; white-space: pre; color: var(--ink-2); }
+
+.sec-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-4); }
+@media (min-width: 720px) { .sec-grid { grid-template-columns: repeat(2, 1fr); } }
+.sec { border: 1.5px solid var(--ink); border-radius: var(--r-3); padding: var(--s-5); background: var(--bg); display: flex; flex-direction: column; gap: 8px; }
+.sec .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--peach-deep); }
+.sec h4 { font-family: var(--font-sans); font-weight: 700; font-size: 18px; margin: 0; }
+.sec p { font-size: 14px; line-height: 1.6; color: var(--fg-secondary); margin: 0; }
+.sec code { font-family: var(--font-mono); font-size: 13px; background: var(--bg-cream); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
+
+.cta-band { padding: var(--s-9) 0; text-align: center; }
+.cta-headline { font-family: var(--font-sans); font-weight: 700; font-size: clamp(40px, 7vw, 80px); line-height: 1; letter-spacing: -0.02em; margin: 0 auto var(--s-5); max-width: 14ch; }
+.cta-headline .accent { color: var(--peach-deep); }
+.cta-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+
+footer { padding: var(--s-7) 0; border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); letter-spacing: 0.06em; }
+footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { text-decoration: none; }
+
+@media (prefers-color-scheme: dark) {
+  body { background: #0a0a0c; color: #f4f4f5; }
+  .topnav { background: rgba(10,10,12,0.92); border-bottom-color: #1f1f23; }
+  .topnav .brand .badge { background: #15151a; border-color: #2a2a30; color: #a0a0a8; }
+  .btn { border-color: #f4f4f5; }
+  .btn.primary { background: #f4f4f5; color: #0a0a0c; }
+  .btn.primary:hover { background: var(--peach); color: #0a0a0c; }
+  .btn.ghost { background: transparent; color: #f4f4f5; }
+  .btn.ghost:hover { background: #15151a; }
+  section.band { border-top-color: #1f1f23; }
+  section.band.cream { background: #15151a; }
+  section.band.dotted { background-image: radial-gradient(circle at 1px 1px, #2a2a30 1px, transparent 0); background-color: #0a0a0c; }
+  .hero .install { border-color: #f4f4f5; background: #0a0a0c; }
+  .flow, .terminal, .cmd-table, .flow-ascii, .sec { border-color: #f4f4f5; background: #0a0a0c; }
+  .terminal .titlebar { background: #15151a; border-bottom-color: #2a2a30; }
+  .cmd-table th { background: #15151a; border-bottom-color: #f4f4f5; color: #a0a0a8; }
+  .cmd-table td { border-top-color: #2a2a30; color: #c4c4c8; }
+  .flow.accent { background: var(--peach); color: #0a0a0c; }
+  .flow.accent .cmd { background: #fff8ef; color: #0a0a0c; }
+  .sec code { background: #15151a; border-color: #2a2a30; color: #f4f4f5; }
+  .tile-1 { background: #0a0a0c; }
+  .tile-2 { background: var(--peach); color: #0a0a0c; }
+  .tile-3 { background: #15151a; }
+  footer { border-top-color: #1f1f23; }
+  .terminal pre .out { color: #c4c4c8; }
+  .terminal pre { color: #f4f4f5; }
+  .flow-ascii { color: #f4f4f5; }
+}
+</style>
+</head>
+<body>
+
+<header class="topnav" role="banner">
+  <a class="brand" href="#" aria-label="claude-call home">
+    <img src="assets/brand/patter-mark.png" alt="">
+    <span>claude-call</span>
+    <span class="badge">v0.2.4</span>
+  </a>
+  <nav aria-label="primary">
+    <a href="#how">How it works</a>
+    <a href="#install">Install</a>
+    <a href="#commands">Commands</a>
+    <a class="ghbtn" href="https://github.com/PatterAI/awesome-claude-call" rel="noopener">Star on GitHub</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="band first hero" aria-labelledby="hero-title">
+  <div class="container hero-grid">
+    <div>
+      <p class="eyebrow">Claude Code plugin &middot; v0.2.4 &middot; MIT</p>
+      <h1 id="hero-title">Give Claude Code a <span class="accent">phone&nbsp;number.</span></h1>
+      <p class="lead">A two-way voice bridge for Claude Code. Make outbound calls, get rung when work is done, talk to your agent from anywhere.</p>
+
+      <div class="install" aria-label="One-line install">
+        <span class="glyph">$</span>
+        <code>/plugin marketplace add github.com/PatterAI/awesome-claude-call</code>
+      </div>
+
+      <div class="ctas">
+        <a class="btn primary" href="https://github.com/PatterAI/awesome-claude-call" rel="noopener">Open the repo &rarr;</a>
+        <a class="btn ghost" href="#install">Install in 4 steps</a>
+      </div>
+
+      <p class="stamp">Powered by Patter &middot; Twilio &middot; OpenAI Realtime</p>
+    </div>
+
+    <div class="stack-illust" aria-hidden="true">
+      <div class="stack">
+        <div class="tile tile-3"><span>Telephone</span><span class="num">03</span></div>
+        <div class="tile tile-2"><span>Patter</span><span class="num">02</span></div>
+        <div class="tile tile-1"><span>Agent</span><span class="num">01</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band cream" aria-labelledby="flows-title">
+  <div class="container">
+    <p class="eyebrow">What it does</p>
+    <h2 id="flows-title" class="h2" style="margin: 0 0 var(--s-6); max-width: 22ch;">Three flows. One plugin install. Real phone calls.</h2>
+    <div class="flows">
+      <article class="flow accent">
+        <span class="num">01 &middot; killer feature</span>
+        <h3>Claude &rarr; third party</h3>
+        <p>Outbound. Claude dials, negotiates against an objective, and reports back with a structured outcome.</p>
+        <code class="cmd">/claude-call:call-me +1555&hellip; book a table</code>
+      </article>
+      <article class="flow">
+        <span class="num">02 &middot; autonomous</span>
+        <h3>Claude &rarr; you</h3>
+        <p>Stop hook arms when you run <code>/notify-me</code>. When the long task finishes, Claude rings you with a summary you can talk back to.</p>
+        <code class="cmd">/claude-call:notify-me +1555&hellip;</code>
+      </article>
+      <article class="flow">
+        <span class="num">03 &middot; inbound</span>
+        <h3>You &rarr; Claude</h3>
+        <p>Dial your Twilio number from anywhere. Drops you straight into a voice conversation with the active session.</p>
+        <code class="cmd">/claude-call:serve-me</code>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="install" aria-labelledby="install-title">
+  <div class="container">
+    <p class="eyebrow">Installation</p>
+    <h2 id="install-title" class="h2" style="margin: 0 0 var(--s-6);">Four steps. Then place a call.</h2>
+
+    <div class="terminal">
+      <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="label">claude code session</span></div>
+<pre><span class="cm"># 1. Add the marketplace</span>
+<span class="prompt">&gt;</span> /plugin marketplace add <span class="arg">https://github.com/PatterAI/awesome-claude-call</span>
+
+<span class="cm"># 2. Install the plugin (registers MCP server, hooks, slash commands)</span>
+<span class="prompt">&gt;</span> /plugin install <span class="arg">claude-call@claude-call</span>
+
+<span class="cm"># 3. Configure credentials (Twilio + OpenAI)</span>
+<span class="prompt">&gt;</span> /claude-call:setup
+
+<span class="cm"># 4. Restart, then place a call</span>
+<span class="prompt">&gt;</span> /exit
+<span class="prompt">&gt;</span> /claude-call:call-me <span class="arg">+15555550200</span> book a table for 2 at 8pm
+
+<span class="out">Dialing&hellip; ringing&hellip; agent connected.</span>
+<span class="ok">Confirmed.</span> <span class="accent">Sat 20:00, table for 2, under "Smith".</span>
+<span class="out">Transcript: 4 turns &middot; Cost: $0.04 &middot; Duration: 28s</span>
+</pre>
+    </div>
+  </div>
+</section>
+
+<section class="band cream" id="commands" aria-labelledby="commands-title">
+  <div class="container">
+    <p class="eyebrow">Slash commands</p>
+    <h2 id="commands-title" class="h2" style="margin: 0 0 var(--s-6);">The whole API surface.</h2>
+    <table class="cmd-table">
+      <thead><tr><th style="width:32%;">Command</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td class="name">/claude-call:call-me &lt;num&gt; &lt;objective&gt;</td><td>Outbound call to a third party with autonomous goal pursuit. Returns transcript and structured outcome.</td></tr>
+        <tr><td class="name">/claude-call:notify-me &lt;num&gt;</td><td>Arms a Stop hook. Claude calls you when the current task finishes.</td></tr>
+        <tr><td class="name">/claude-call:notify-me-cancel</td><td>Disarms <code>/claude-call:notify-me</code>.</td></tr>
+        <tr><td class="name">/claude-call:dial-me-on-blocked &lt;num&gt;</td><td>Arms a Notification hook. Claude calls you whenever it stalls on permission or idle prompts.</td></tr>
+        <tr><td class="name">/claude-call:dial-me-on-blocked-cancel</td><td>Disarms <code>/claude-call:dial-me-on-blocked</code>.</td></tr>
+        <tr><td class="name">/claude-call:calls</td><td>Lists recent calls with status, duration, and cost.</td></tr>
+        <tr><td class="name">/claude-call:serve-me</td><td>Arms the inbound voice agent &mdash; callers reach Claude.</td></tr>
+        <tr><td class="name">/claude-call:serve-me-cancel</td><td>Disarms inbound.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band dotted" id="how" aria-labelledby="how-title">
+  <div class="container">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-title" class="h2" style="margin: 0 0 var(--s-6); max-width: 24ch;">Plugin layer plus a bundled MCP server, both small.</h2>
+    <div class="flow-ascii">Claude Code session
+  /claude-call:* slash commands     phone-agent subagent     Stop / Notification hooks
+                       \                  |                  /
+                        \                 |                 /
+                         v                v                v
+                          stdio MCP transport
+                                  |
+                                  v
+                       bundled server  (server/, ~800 LOC TS)
+                       make_call · call_third_party · get_calls · get_transcript
+                                  |
+                                  v
+                        Patter SDK + Cloudflare tunnel  (lazy, first call)
+                                  |
+                                  v
+                              Twilio &rarr; PSTN</div>
+
+    <p style="margin-top: var(--s-5); max-width: 70ch;">The plugin layer is roughly 700 lines of shell and markdown. The bundled server in <code>server/</code> is roughly 800 lines of TypeScript that wraps the <a href="https://www.npmjs.com/package/getpatter"><code>getpatter</code></a> SDK directly. Port discovery probes the range <code>[8002, 8099]</code> and picks one that is bindable on <code>127.0.0.1</code> and silent on <code>::1</code>, so a stray Docker container on <code>[::]:8000</code> can't hijack tunnel audio.</p>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="sec-title">
+  <div class="container">
+    <p class="eyebrow">Privacy and security</p>
+    <h2 id="sec-title" class="h2" style="margin: 0 0 var(--s-6);">Boring guarantees that matter.</h2>
+
+    <div class="sec-grid">
+      <div class="sec">
+        <span class="num">01</span>
+        <h4>AI disclosure on every outbound call</h4>
+        <p>Hard-coded into outbound system prompts on the first turn. Non-overridable in v0.2.</p>
+      </div>
+      <div class="sec">
+        <span class="num">02</span>
+        <h4>Phone numbers redacted in logs</h4>
+        <p>Every log line that touches a number runs through <code>cc_redact_phone</code> &mdash; last 4 digits only.</p>
+      </div>
+      <div class="sec">
+        <span class="num">03</span>
+        <h4>Credentials file mode 0600</h4>
+        <p>Server refuses to start if <code>~/.claude-call/credentials</code> is world- or group-readable.</p>
+      </div>
+      <div class="sec">
+        <span class="num">04</span>
+        <h4>No surprise outbound HTTP</h4>
+        <p>The plugin only talks to Twilio, OpenAI, and Cloudflare's tunnel control plane. Nothing else leaves the box.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band cream cta-band" aria-labelledby="cta-title">
+  <div class="container">
+    <p class="eyebrow">Ship it</p>
+    <h2 class="cta-headline" id="cta-title">Your <span class="accent">next call</span> is one slash away.</h2>
+    <div class="cta-links">
+      <a class="btn primary" href="https://github.com/PatterAI/awesome-claude-call" rel="noopener">Repo</a>
+      <a class="btn ghost" href="https://github.com/PatterAI/awesome-claude-call/releases/latest" rel="noopener">Latest release</a>
+      <a class="btn ghost" href="https://github.com/PatterAI/Patter" rel="noopener">Patter SDK</a>
+      <a class="btn ghost" href="https://github.com/PatterAI/awesome-claude-call/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container row">
+    <span>PatterAI &middot; MIT &middot; Built on Patter &middot; 2026</span>
+    <span><a href="https://github.com/PatterAI/awesome-claude-call/blob/main/SECURITY.md">Security</a> &middot; <a href="https://github.com/PatterAI/awesome-claude-call/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

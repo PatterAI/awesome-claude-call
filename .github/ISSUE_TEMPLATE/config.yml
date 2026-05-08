@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/PatterAI/awesome-claude-call/security/advisories/new
+    about: Privately report a vulnerability. Do not open a public issue.
+  - name: Patter SDK
+    url: https://github.com/PatterAI/Patter
+    about: Bugs in the underlying voice SDK belong upstream.

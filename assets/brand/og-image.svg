@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-label="claude-call — Give Claude Code a phone number">
+  <title>claude-call — Give Claude Code a phone number</title>
+  <defs>
+    <pattern id="og-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="#dad8de"/>
+    </pattern>
+    <radialGradient id="og-halo" cx="35%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#fff8ef" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fff8ef" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1280" height="640" fill="#ffffff"/>
+  <rect width="1280" height="640" fill="url(#og-dots)"/>
+  <rect width="1280" height="640" fill="url(#og-halo)"/>
+
+  <!-- left handset tile -->
+  <g transform="translate(96, 184)">
+    <rect width="272" height="272" rx="32" ry="32" fill="#df9367" stroke="#000000" stroke-width="2.5"/>
+    <g transform="translate(56, 60)" fill="none" stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 36 C22 18, 36 8, 52 12 L86 20 C96 22, 102 32, 100 42 L92 64 C88 76, 76 82, 66 76 L56 70"/>
+      <path d="M104 132 C118 144, 134 156, 152 156 L152 134 C146 122, 134 110, 122 104 L112 110 C108 114, 106 116, 104 120"/>
+      <path d="M56 70 L100 152"/>
+    </g>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <g transform="translate(440, 0)" font-family="Instrument Sans, system-ui, sans-serif" fill="#000000">
+    <text x="0" y="320" font-size="160" font-weight="700" letter-spacing="-4">claude&#8209;call</text>
+    <text x="4" y="378" font-size="32" font-weight="500" fill="#1a1a1a" letter-spacing="-0.4">Give Claude Code a phone number.</text>
+    <text x="4" y="416" font-size="20" font-weight="400" fill="#4a4a4a" letter-spacing="-0.2">Outbound, inbound, and ring-when-done voice calls.</text>
+  </g>
+
+  <!-- bottom row: install snippet + powered-by tag -->
+  <g transform="translate(440, 472)" font-family="JetBrains Mono, ui-monospace, SF Mono, Menlo, monospace">
+    <rect width="704" height="56" rx="14" ry="14" fill="#fafaf8" stroke="#eeeeee" stroke-width="1"/>
+    <text x="20" y="36" font-size="18" font-weight="500" fill="#c97a4c">$</text>
+    <text x="44" y="36" font-size="18" fill="#1a1a1a">/plugin marketplace add github.com/PatterAI/awesome-claude-call</text>
+  </g>
+
+  <g transform="translate(96, 532)" font-family="JetBrains Mono, ui-monospace, SF Mono, Menlo, monospace">
+    <rect width="200" height="36" rx="999" ry="999" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="18" y="23" font-size="12" font-weight="500" fill="#000000" letter-spacing="1">POWERED BY PATTER</text>
+  </g>
+
+  <!-- top-right meta tag -->
+  <g transform="translate(1024, 56)" font-family="JetBrains Mono, ui-monospace, SF Mono, Menlo, monospace">
+    <rect width="160" height="36" rx="999" ry="999" fill="#000000"/>
+    <text x="22" y="23" font-size="12" font-weight="500" fill="#ffffff" letter-spacing="1">CLAUDE CODE PLUGIN</text>
+  </g>
+</svg>

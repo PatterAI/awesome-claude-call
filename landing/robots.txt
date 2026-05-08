@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://patterai.github.io/awesome-claude-call/sitemap.xml

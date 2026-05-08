@@ -8,8 +8,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/claude-call-banner-dark.svg" />
-    <img src="docs/assets/brand/claude-call-banner-light.svg" alt="claude-call — Give Claude Code a phone number." width="100%" />
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/claude-call-banner-dark.svg" />
+    <img src="assets/brand/claude-call-banner-light.svg" alt="claude-call — Give Claude Code a phone number." width="100%" />
   </picture>
 </p>
 

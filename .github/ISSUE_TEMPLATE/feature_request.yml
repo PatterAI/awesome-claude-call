@@ -1,0 +1,31 @@
+name: Feature request
+description: A proposal for new behavior or a meaningful change to existing behavior.
+title: "[feat]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you do today, and why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Sketch the API or UX. Slash command? New tool? Config flag?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other shapes you thought about and rejected.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This belongs in the plugin layer (slash commands, hooks, subagent prompts), not in upstream Patter.
+        - label: This does not weaken the privacy invariants in `SECURITY.md`.
