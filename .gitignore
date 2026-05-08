@@ -14,9 +14,17 @@ CLAUDE.md
 *.bats.tmp
 tests/.tmp/
 
-docs/ 
-docs/**
-*.md
+docs/superpowers/
 
 .env
 .env.*
+
+# Credential and key files
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS / editor
+Thumbs.db
+*.swp
