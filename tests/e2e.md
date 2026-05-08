@@ -4,17 +4,14 @@ Run before each release. Costs ~$0.05 per test call.
 
 ## Setup
 
-1. Start patter-mcp with real keys:
-   ```bash
-   cd ~/dev/patter-mcp && npm run dev
-   ```
-2. Install the plugin into Claude Code (or symlink the repo into `~/.claude/plugins/claude-call`).
-3. Restart Claude Code.
+1. Install the plugin into Claude Code (or symlink the repo into `~/.claude/plugins/claude-call`).
+2. Restart Claude Code.
+3. Run `/claude-call:setup` to configure Twilio + voice-engine credentials (if not already done).
 
 ## Smoke test 1: `/call` to a real number you own
 
-1. In a new session: `/call <your-own-number> ask whether I can hear you and then say goodbye`
-2. Expected: Claude dispatches phone-agent. Phone-agent calls `mcp__patter-mcp__call_third_party`. Your phone rings within ~5s.
+1. In a new session: `/claude-call:call-me <your-own-number> ask whether I can hear you and then say goodbye`
+2. Expected: Claude dispatches phone-agent. Phone-agent calls the `call_third_party` MCP tool. Your phone rings within ~5s.
 3. Pick up. Verify the agent:
    - Identifies as "an AI assistant calling on behalf of the user"
    - Asks "can you hear me?"
@@ -24,7 +21,7 @@ Run before each release. Costs ~$0.05 per test call.
 
 ## Smoke test 2: `/notify-me` triggers on Stop
 
-1. In a new session: `/notify-me <your-own-number>`
+1. In a new session: `/claude-call:notify-me <your-own-number>`
 2. Verify reply: "Armed. I'll call you at the number you provided when this task completes."
 3. Run a small task: "list the files in the current directory and tell me how many there are."
 4. After Claude responds and the turn ends, the Stop hook fires. Phone rings.
@@ -33,12 +30,12 @@ Run before each release. Costs ~$0.05 per test call.
 
 ## Smoke test 3: `/dial-me-on-blocked` triggers on permission prompt
 
-1. In a new session: `/dial-me-on-blocked <your-own-number>`
+1. In a new session: `/claude-call:dial-me-on-blocked <your-own-number>`
 2. Try to make Claude do something requiring confirmation (e.g., `Bash(rm -rf /tmp/cc-test)` outside the allowlist).
 3. When the permission prompt appears, the Notification hook should fire and your phone should ring.
 4. **Pass criteria**: phone rings within ~5s of the permission prompt.
 
 ## Cleanup
 
-- `/notify-me-cancel` and `/dial-me-on-blocked-cancel` to disarm.
-- Stop patter-mcp.
+- `/claude-call:notify-me-cancel` and `/claude-call:dial-me-on-blocked-cancel` to disarm.
+- The bundled MCP server stops automatically when Claude Code exits.
