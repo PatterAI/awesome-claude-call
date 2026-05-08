@@ -57,7 +57,7 @@ All notable changes to claude-call are documented here. Format: [Keep a Changelo
 - **BREAKING:** `PATTER_MCP_URL` env var removed. Configuration now lives in `~/.claude-call/credentials` (mode 0600).
 - `.mcp.json` switches transport from HTTP to stdio (the bundled server is launched by Claude Code as a child process).
 - Three-command install replaces "clone two repos + edit `.env` + `npm run dev`" flow.
-- Build toolchain uses `tsc` + `node:test` (zero-dep, no esbuild) — chosen because esbuild's prebuilt binary is killed by macOS 26 kernel restrictions on the developer's machine.
+- Build toolchain uses `tsc` + `node:test` (zero-dep, no esbuild) — esbuild's prebuilt binary is incompatible with macOS 26 kernel restrictions.
 
 ### Removed
 - `scripts/preflight.sh` HTTP `/health` polling — no longer needed (server starts on demand via stdio).
@@ -65,8 +65,8 @@ All notable changes to claude-call are documented here. Format: [Keep a Changelo
 
 ### Migration from v0.1
 1. Update plugin: `/plugin update claude-call@claude-call`
-2. Run `/claude-call:setup` and paste credentials previously in `~/dev/patter-mcp/.env`
-3. Optionally `rm -rf ~/dev/patter-mcp`
+2. Run `/claude-call:setup` and paste the Twilio + voice-engine credentials from your old `.env` file.
+3. Optionally remove the now-redundant `patter-mcp` clone.
 
 ## [0.1.0] — 2026-04-27
 
