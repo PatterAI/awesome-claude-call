@@ -18,6 +18,10 @@ docs/superpowers/
 
 .env
 .env.*
+!.env.example
+
+# Stale root-level lock file (no root package.json)
+/package-lock.json
 
 # Credential and key files
 *.pem

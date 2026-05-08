@@ -4,7 +4,7 @@ import { redactPhone } from '../../src/redact.js';
 
 describe('redactPhone', () => {
   it('keeps +<2-digit-country-code> prefix and last-4, masks middle', () => {
-    assert.equal(redactPhone('+15555550100'), '+39******4567');
+    assert.equal(redactPhone('+15555550100'), '+15*****0100');
     assert.equal(redactPhone('+15551234567'), '+15*****4567');
   });
 

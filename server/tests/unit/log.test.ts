@@ -31,7 +31,7 @@ describe('logEvent', () => {
     await logEvent({ event: 'call', to: '+15555550100', from: '+15551234567' }, logPath);
     const line = readFileSync(logPath, 'utf8').trim();
     const parsed = JSON.parse(line);
-    assert.equal(parsed.to, '+39******4567');
+    assert.equal(parsed.to, '+15*****0100');
     assert.equal(parsed.from, '+15*****4567');
   });
 
