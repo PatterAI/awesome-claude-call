@@ -25,8 +25,8 @@ load '../helpers/setup'
 
 @test "cc_redact_phone keeps first 3 + last 4 digits, masks the middle" {
   source "${REPO_ROOT}/scripts/lib.sh"
-  # +15555550100 → 13 chars: keep first 3 (+39) + last 4 (4567), mask 6 in the middle
-  [ "$(cc_redact_phone '+15555550100')" = '+39******4567' ]
+  # +15555550100 → 12 chars: keep first 3 (+15) + last 4 (0100), mask 5 in the middle
+  [ "$(cc_redact_phone '+15555550100')" = '+15*****0100' ]
   # +15551234567 → 12 chars: keep first 3 (+15) + last 4 (4567), mask 5 in the middle
   [ "$(cc_redact_phone '+15551234567')" = '+15*****4567' ]
 }
