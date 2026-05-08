@@ -83,7 +83,7 @@ const TOOLS: ToolDef[] = [
 
 export async function startMcpServer(): Promise<void> {
   const server = new Server(
-    { name: 'claude-call', version: '0.2.3' },
+    { name: 'claude-call', version: '0.2.4' },
     { capabilities: { tools: {} } },
   );
 
