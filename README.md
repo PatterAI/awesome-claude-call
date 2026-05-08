@@ -202,10 +202,6 @@ GitHub Actions CI runs on every push and PR (Ubuntu + macOS matrix). Manual end-
 
 ## ✦ Project docs
 
-- 📄 **v0.1 Spec** — [`docs/superpowers/specs/2026-04-27-claude-call-design.md`](docs/superpowers/specs/2026-04-27-claude-call-design.md)
-- 🗺 **v0.1 Plan** — [`docs/superpowers/plans/2026-04-27-claude-call-v0.1.md`](docs/superpowers/plans/2026-04-27-claude-call-v0.1.md)
-- 📄 **v0.2 Spec** — [`docs/superpowers/specs/2026-04-28-claude-call-smooth-setup-design.md`](docs/superpowers/specs/2026-04-28-claude-call-smooth-setup-design.md)
-- 🗺 **v0.2 Plan** — [`docs/superpowers/plans/2026-04-28-claude-call-v0.2.0.md`](docs/superpowers/plans/2026-04-28-claude-call-v0.2.0.md)
 - 📓 **Changelog** — [`CHANGELOG.md`](CHANGELOG.md)
 - 🎨 **HTML landing page** — [`docs/landing/index.html`](docs/landing/index.html) *(open locally)*
 
