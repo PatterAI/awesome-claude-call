@@ -15,7 +15,7 @@ CLAUDE.md
 tests/.tmp/
 
 docs/superpowers/
-
+docs/postmortems/
 
 .env
 .env.*
