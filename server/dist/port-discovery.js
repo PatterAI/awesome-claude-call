@@ -3,13 +3,11 @@ import * as net from 'node:net';
  * Defaults for the Patter embedded HTTP/WebSocket server port.
  *
  * We start at 8002 — one above the most common docker-compose default
- * (8000-8001). Why we do not just use 8000 is the subject of
- * ``. tl;dr: macOS
- * resolves `localhost` to `::1` first, and any Docker container that maps
- * `[::]:8000` (e.g. the official `patter-dashboard`) silently steals the
- * Cloudflare tunnel's traffic away from the real Patter server on
- * `127.0.0.1:8000`. A port range plus a probe is the right shape: we cannot
- * predict the user's port collisions, and the probe budget is cheap.
+ * (8000-8001). macOS resolves `localhost` to `::1` first, so any Docker
+ * container that maps `[::]:8000` silently steals Cloudflare tunnel traffic
+ * away from the Patter server on `127.0.0.1:8000`. A port range plus a dual
+ * IPv4/IPv6 probe is the right shape: we cannot predict port collisions, and
+ * the probe budget is cheap.
  *
  * Range upper bound is generous; if 98 consecutive ports are unusable, the
  * thrown error will help the operator notice it.

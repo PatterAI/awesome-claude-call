@@ -77,12 +77,9 @@ export async function ensureServing(ctx, target) {
         servingState = null;
     }
     // Probe a port range and pick one where (a) Patter can bind on 127.0.0.1
-    // AND (b) no IPv6 listener at ::1:<port> can hijack tunnel traffic. See
-    //  for the full
-    // story; the short version is: getpatter@0.5.4 starts cloudflared with the
-    // literal target string `http://localhost:<port>`, and on macOS that name
-    // resolves to ::1 before 127.0.0.1, so any Docker container that mapped
-    // [::]:8000-8001 (e.g. `patter-dashboard`) silently steals the audio.
+    // AND (b) no IPv6 listener at ::1:<port> can hijack tunnel traffic.
+    // getpatter@0.5.4 targets `http://localhost:<port>`, which on macOS resolves
+    // to ::1 first — any Docker container on [::]:8000-8001 silently steals audio.
     const port = await findFreePort({
         onSkip: (skippedPort, reason) => void logEvent({ event: 'port_skipped', port: skippedPort, reason }),
     });
