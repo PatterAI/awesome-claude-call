@@ -197,7 +197,6 @@ GitHub Actions CI runs on every push and PR (Ubuntu and macOS matrix). Manual en
 | Doc | What's in it |
 |---|---|
 | [`CHANGELOG.md`](CHANGELOG.md) | Versioned change log. |
-| [`docs/landing/index.html`](docs/landing/index.html) | Static landing page (open locally or via GitHub Pages). |
 | [`tests/e2e.md`](tests/e2e.md) | Manual end-to-end smoke-test checklist. |
 | [`SECURITY.md`](SECURITY.md) | How to report a security issue. |
 | [`CITATION.cff`](CITATION.cff) | Cite this work. |

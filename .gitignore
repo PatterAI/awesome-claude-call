@@ -14,8 +14,7 @@ CLAUDE.md
 *.bats.tmp
 tests/.tmp/
 
-docs/superpowers/
-docs/postmortems/
+docs/
 
 .env
 .env.*
