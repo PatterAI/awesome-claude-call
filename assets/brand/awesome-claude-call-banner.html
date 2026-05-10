@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>make-claude-call — README banner</title>
+<link rel="stylesheet" href="../design/colors_and_type.css" />
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #2a2a2a;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  /* ===== fixed-size banner canvas ===== */
+  .banner {
+    position: relative;
+    width: 2400px;
+    height: 1200px;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* ---- left rail ---- */
+  .left {
+    position: relative;
+    padding: 96px 96px 96px 128px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--bg);
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .wordmark img.mark {
+    width: 72px;
+    height: 72px;
+    display: block;
+  }
+  .wordmark .word {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 60px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .copy {
+    max-width: 980px;
+  }
+
+  .repo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 22px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--bg);
+    margin-bottom: 56px;
+  }
+  .repo-tag .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--peach);
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 200px;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin: 0 0 40px 0;
+  }
+  .title .em {
+    color: var(--peach-deep);
+  }
+
+  .lede {
+    font-family: var(--font-sans);
+    font-size: 36px;
+    line-height: 1.4;
+    color: var(--fg-secondary);
+    max-width: 880px;
+    margin: 0 0 56px 0;
+    text-wrap: pretty;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--fg-tertiary);
+  }
+  .meta-row .sep {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+  }
+  .meta-row strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ---- right panel ---- */
+  .right {
+    position: relative;
+    background-color: var(--bg-cream);
+    background-image: var(--dot-grid);
+    background-size: 24px 24px;
+    background-position: 12px 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* the curated list "directory" card, isometric-ish */
+  .stage {
+    position: relative;
+    width: 820px;
+    height: 920px;
+    transform: translate(-20px, 0);
+  }
+
+  .card {
+    position: absolute;
+    background: var(--bg);
+    border: 3px solid var(--ink);
+    border-radius: 28px;
+    box-sizing: border-box;
+  }
+
+  /* back card (cream offset, depth) */
+  .card.back {
+    inset: 64px 0 0 64px;
+    background: var(--bg-cream);
+  }
+
+  /* primary card */
+  .card.front {
+    inset: 0 64px 64px 0;
+    padding: 56px 56px 48px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 28px;
+  }
+  .card-head .name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 44px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .card-head .badge {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--peach);
+    color: var(--ink);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    background: var(--bg);
+  }
+  .item.accent {
+    background: var(--peach-cream);
+  }
+  .item .arrow {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+  }
+  .item .arrow svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+  .item .label {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .item .tag {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--fg-tertiary);
+    letter-spacing: 0.04em;
+  }
+
+  .card-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1.5px solid var(--line);
+    padding-top: 24px;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--fg-tertiary);
+  }
+  .card-foot .left-foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-foot .pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--peach);
+    box-shadow: 0 0 0 4px rgba(223, 147, 103, 0.18);
+  }
+
+  /* corner brand tag (top-right of right panel) */
+  .corner-tag {
+    position: absolute;
+    top: 56px;
+    right: 56px;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .corner-tag .tick {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--ink);
+    transform: rotate(45deg);
+    background: var(--bg);
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+
+  <!-- ============== LEFT ============== -->
+  <section class="left">
+
+    <header class="wordmark">
+      <img class="mark" src="patter-mark.png" alt="" />
+      <span class="word">Patter</span>
+    </header>
+
+    <div class="copy">
+      <div class="repo-tag">
+        <span class="dot"></span>
+        <span>@PatterAI&#47;make-claude-call</span>
+      </div>
+
+      <h1 class="title">make<br />claude <span class="em">call</span></h1>
+
+      <p class="lede">
+        A curated list of agents, prompts, templates, and tools for connecting
+        Claude to real phone calls — built on the Patter SDK.
+      </p>
+
+      <div class="meta-row">
+        <span><strong>open&nbsp;source</strong>&nbsp;&nbsp;MIT</span>
+        <span class="sep"></span>
+        <span><strong>updated</strong>&nbsp;&nbsp;weekly</span>
+        <span class="sep"></span>
+        <span><strong>contributions</strong>&nbsp;&nbsp;welcome</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============== RIGHT ============== -->
+  <section class="right">
+
+    <div class="corner-tag">
+      <span class="tick"></span>
+      <span>curated · 2026</span>
+    </div>
+
+    <div class="stage">
+      <div class="card back"></div>
+
+      <div class="card front">
+        <div class="card-head">
+          <span class="name">make-claude-call</span>
+          <span class="badge">List</span>
+        </div>
+
+        <ul class="list">
+          <li class="item">
+            <span class="arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </span>
+            <span class="label">Inbound &amp; outbound agents</span>
+            <span class="tag">8&nbsp;repos</span>
+          </li>
+
+          <li class="item accent">
+            <span class="arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </span>
+            <span class="label">Prompts &amp; system messages</span>
+            <span class="tag">22&nbsp;files</span>
+          </li>
+
+          <li class="item">
+            <span class="arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </span>
+            <span class="label">Tool-calling recipes</span>
+            <span class="tag">14&nbsp;recipes</span>
+          </li>
+
+          <li class="item">
+            <span class="arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </span>
+            <span class="label">Voices, STT &amp; TTS</span>
+            <span class="tag">11&nbsp;providers</span>
+          </li>
+
+          <li class="item">
+            <span class="arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </span>
+            <span class="label">Production &amp; observability</span>
+            <span class="tag">9&nbsp;guides</span>
+          </li>
+        </ul>
+
+        <div class="card-foot">
+          <span class="left-foot"><span class="pulse"></span><span>~500&nbsp;ms&nbsp;TTFA · 4&nbsp;lines&nbsp;of&nbsp;code</span></span>
+          <span>github.com&#47;PatterAI&#47;make-claude-call</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+</body>
+</html>

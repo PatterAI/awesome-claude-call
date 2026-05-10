@@ -7,10 +7,7 @@
 -->
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/claude-call-banner-dark.svg" />
-    <img src="assets/brand/claude-call-banner-light.svg" alt="claude-call — Give Claude Code a phone number." width="100%" />
-  </picture>
+  <img src="assets/brand/claude-call-banner.png" alt="make claude call — A curated list of agents, prompts, templates, and tools for connecting Claude to real phone calls." width="100%" />
 </p>
 
 <p align="center">
