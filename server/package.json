@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "getpatter": "^0.5.4"
+    "getpatter": "^0.7.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
